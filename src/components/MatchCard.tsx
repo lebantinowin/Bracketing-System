@@ -79,44 +79,65 @@ export const MatchCard: React.FC<MatchCardProps> = ({
   }
 
   return (
-    <div className="p-4 bg-gradient-to-br from-slate-50 to-slate-100 rounded-lg border-2 border-slate-200 hover:shadow-md transition-shadow">
+    <div className={`p-4 rounded-xl border-2 transition-all duration-300 ${
+      hasWinner 
+        ? 'bg-white border-green-200 shadow-sm' 
+        : 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-200 hover:shadow-md'
+    }`}>
       <div className="flex items-center justify-between mb-3">
-        <span className="text-xs font-semibold text-gray-600 uppercase">Match {match.matchNumber + 1}</span>
-        {hasWinner && <CheckCircle className="text-green-500" size={18} />}
+        <div className="flex flex-col">
+          <span className="text-[10px] font-black text-slate-400 uppercase tracking-tighter">Round {match.roundNumber + 1}</span>
+          <span className="text-xs font-bold text-slate-600 uppercase">Match {match.matchNumber + 1}</span>
+        </div>
+        {hasWinner ? (
+          <div className="bg-green-500 text-white p-1 rounded-full animate-bounce">
+            <CheckCircle size={14} />
+          </div>
+        ) : (
+          match.timestamp && (
+            <span className="text-[10px] text-slate-400 font-medium">
+              {new Date(match.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+            </span>
+          )
+        )}
       </div>
 
       {!isEditing && !editMode ? (
         <>
-          <div className="mb-4">
-            <div className={`p-3 rounded-lg mb-2 flex items-center justify-between ${
+          <div className="space-y-2 mb-3">
+            <div className={`group relative p-3 rounded-xl transition-all ${
               hasWinner && match.winner?.id === match.team1?.id
-                ? 'bg-green-100 border border-green-300'
-                : 'bg-white border border-gray-200'
+                ? 'bg-green-50 border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+                : 'bg-white border-2 border-slate-100'
             }`}>
-              <span className={`font-semibold ${
-                hasWinner && match.winner?.id === match.team1?.id
-                  ? 'text-green-800'
-                  : 'text-gray-800'
-              }`}>
-                {team1Name}
-              </span>
-              <span className="text-xl font-bold text-gray-800">{score1}</span>
+              <div className="flex items-center justify-between">
+                <span className={`font-bold truncate pr-2 ${
+                  hasWinner && match.winner?.id === match.team1?.id ? 'text-green-700' : 'text-slate-700'
+                }`}>
+                  {team1Name}
+                </span>
+                <span className={`text-lg font-black ${
+                  hasWinner && match.winner?.id === match.team1?.id ? 'text-green-600' : 'text-slate-900'
+                }`}>{score1}</span>
+              </div>
             </div>
 
             {!isBye && (
-              <div className={`p-3 rounded-lg flex items-center justify-between ${
+              <div className={`group relative p-3 rounded-xl transition-all ${
                 hasWinner && match.winner?.id === match.team2?.id
-                  ? 'bg-green-100 border border-green-300'
-                  : 'bg-white border border-gray-200'
+                  ? 'bg-green-50 border-2 border-green-500 shadow-[0_0_15px_rgba(34,197,94,0.1)]'
+                  : 'bg-white border-2 border-slate-100'
               }`}>
-                <span className={`font-semibold ${
-                  hasWinner && match.winner?.id === match.team2?.id
-                    ? 'text-green-800'
-                    : 'text-gray-800'
-                }`}>
-                  {team2Name}
-                </span>
-                <span className="text-xl font-bold text-gray-800">{score2}</span>
+                <div className="flex items-center justify-between">
+                  <span className={`font-bold truncate pr-2 ${
+                    hasWinner && match.winner?.id === match.team2?.id ? 'text-green-700' : 'text-slate-700'
+                  }`}>
+                    {team2Name}
+                  </span>
+                  <span className={`text-lg font-black ${
+                    hasWinner && match.winner?.id === match.team2?.id ? 'text-green-600' : 'text-slate-900'
+                  }`}>{score2}</span>
+                </div>
               </div>
             )}
           </div>
@@ -124,7 +145,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
           {editMode && onUpdate && (
             <button
               onClick={() => setIsEditing(true)}
-              className="w-full bg-blue-600 text-white px-3 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm"
+              className="w-full bg-slate-900 text-white px-4 py-2.5 rounded-xl hover:bg-blue-600 transition-all font-bold text-xs uppercase tracking-widest shadow-lg"
             >
               Enter Score
             </button>
@@ -132,35 +153,37 @@ export const MatchCard: React.FC<MatchCardProps> = ({
         </>
       ) : (
         <>
-          <div className="mb-4">
-            <label className="block text-xs font-medium text-gray-700 mb-1">{team1Name}</label>
-            <input
-              type="number"
-              value={score1}
-              onChange={(e) => setScore1(parseInt(e.target.value) || 0)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-bold"
-              min="0"
-              autoFocus
-            />
-          </div>
-
-          {!isBye && (
-            <div className="mb-4">
-              <label className="block text-xs font-medium text-gray-700 mb-1">{team2Name}</label>
+          <div className="space-y-3 mb-4">
+            <div>
+              <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1 tracking-tighter">{team1Name}</label>
               <input
                 type="number"
-                value={score2}
-                onChange={(e) => setScore2(parseInt(e.target.value) || 0)}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 text-lg font-bold"
+                value={score1}
+                onChange={(e) => setScore1(parseInt(e.target.value) || 0)}
+                className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-xl font-black text-slate-800"
                 min="0"
+                autoFocus
               />
             </div>
-          )}
+
+            {!isBye && (
+              <div>
+                <label className="block text-[10px] font-black text-slate-400 uppercase mb-1 ml-1 tracking-tighter">{team2Name}</label>
+                <input
+                  type="number"
+                  value={score2}
+                  onChange={(e) => setScore2(parseInt(e.target.value) || 0)}
+                  className="w-full px-4 py-3 bg-white border-2 border-slate-200 rounded-xl focus:outline-none focus:border-blue-500 transition-all text-xl font-black text-slate-800"
+                  min="0"
+                />
+              </div>
+            )}
+          </div>
 
           <div className="flex gap-2">
             <button
               onClick={handleSubmit}
-              className="flex-1 bg-green-600 text-white px-3 py-2 rounded-lg hover:bg-green-700 font-medium text-sm"
+              className="flex-1 bg-green-500 text-white px-4 py-3 rounded-xl hover:bg-green-600 transition-all font-bold text-xs uppercase tracking-widest shadow-lg"
             >
               Confirm
             </button>
@@ -170,7 +193,7 @@ export const MatchCard: React.FC<MatchCardProps> = ({
                 setScore1(match.score1 || 0);
                 setScore2(match.score2 || 0);
               }}
-              className="flex-1 bg-gray-300 text-gray-800 px-3 py-2 rounded-lg hover:bg-gray-400 font-medium text-sm"
+              className="flex-1 bg-slate-100 text-slate-500 px-4 py-3 rounded-xl hover:bg-slate-200 transition-all font-bold text-xs uppercase tracking-widest"
             >
               Cancel
             </button>

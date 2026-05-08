@@ -16,11 +16,12 @@ interface TournamentStore {
   saveTournament: () => void;
   loadTournament: (tournament: Tournament) => void;
   resetTournament: () => void;
+  deleteTournament: (tournamentId: string) => void;
 }
 
 export const useTournamentStore = create<TournamentStore>((set, get) => ({
   tournament: null,
-  tournaments: [],
+  tournaments: JSON.parse(localStorage.getItem('tournaments') || '[]'),
 
   createTournament: (name, organizer, description) => {
     const now = Date.now();
@@ -153,7 +154,18 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     set({ tournament });
   },
 
-  resetTournament: () => {
-    set({ tournament: null });
+  resetTournament: () => set({ tournament: null }),
+
+  deleteTournament: (tournamentId) => {
+    const { tournaments, tournament } = get();
+    const newTournaments = tournaments.filter((t) => t.id !== tournamentId);
+    
+    set({ 
+      tournaments: newTournaments,
+      // If we're deleting the current tournament, reset it
+      tournament: tournament?.id === tournamentId ? null : tournament
+    });
+    
+    localStorage.setItem('tournaments', JSON.stringify(newTournaments));
   },
 }));
