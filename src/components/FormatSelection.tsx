@@ -70,59 +70,84 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
-      <h2 className="text-2xl font-bold text-gray-800 mb-2">Tournament Format</h2>
-      <p className="text-gray-600 mb-6">Choose a bracket format for your tournament</p>
+    <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 overflow-hidden relative">
+      <div className="absolute top-0 left-0 w-64 h-64 bg-purple-50 rounded-full -ml-32 -mt-32 opacity-30 blur-3xl"></div>
+      
+      <div className="relative mb-8">
+        <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
+          <div className="w-2 h-8 bg-purple-600 rounded-full"></div>
+          Tournament Format
+        </h2>
+        <p className="text-slate-500 font-medium mt-1">Choose the competitive structure for your bracket</p>
+      </div>
 
-      <div className="mb-8">
-        <label className="block text-sm font-medium text-gray-700 mb-2">Bracket Name</label>
+      <div className="mb-8 relative">
+        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-tighter">Bracket Name</label>
         <input
           type="text"
           value={bracketName}
           onChange={(e) => setBracketName(e.target.value)}
-          placeholder="Name your tournament"
+          placeholder="e.g., Grand Finals 2026"
           disabled={disabled}
-          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
+          className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all text-slate-800 font-bold disabled:opacity-50 shadow-sm"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative">
         {formats.map((format) => (
           <button
             key={format.id}
             onClick={() => setSelectedFormat(format.id)}
             disabled={disabled}
-            className={`p-4 rounded-lg border-2 transition-all ${
+            className={`group relative p-6 rounded-2xl border-2 transition-all duration-500 text-left ${
               selectedFormat === format.id
-                ? 'border-blue-600 bg-blue-50'
-                : 'border-gray-200 bg-white hover:border-gray-300'
-            } disabled:opacity-50 disabled:cursor-not-allowed text-left`}
+                ? 'border-purple-600 bg-purple-50 shadow-xl shadow-purple-500/10'
+                : 'border-slate-100 bg-white hover:border-slate-300'
+            } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <div className="text-3xl mb-2">{format.icon}</div>
-            <h3 className="font-bold text-gray-800">{format.name}</h3>
-            <p className="text-sm text-gray-600 mt-1">{format.description}</p>
+            <div className={`text-4xl mb-4 transform transition-transform group-hover:scale-110 duration-500 ${selectedFormat === format.id ? 'animate-bounce' : ''}`}>{format.icon}</div>
+            <h3 className={`font-black text-lg transition-colors ${selectedFormat === format.id ? 'text-purple-700' : 'text-slate-800'}`}>{format.name}</h3>
+            <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">{format.description}</p>
+            
+            {selectedFormat === format.id && (
+              <div className="absolute top-4 right-4 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                <div className="w-2 h-2 bg-white rounded-full"></div>
+              </div>
+            )}
           </button>
         ))}
       </div>
 
-      <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
-        <p className="text-sm text-gray-700">
-          <strong>Bracket Preview:</strong> {getPreview()}
-        </p>
+      <div className="bg-slate-900 rounded-2xl p-6 mb-8 relative overflow-hidden group">
+        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+        <div className="relative flex items-center justify-between">
+          <div>
+            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest block mb-1">Bracket Intelligence</span>
+            <p className="text-white font-bold text-lg">
+              {getPreview()}
+            </p>
+          </div>
+          <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
+            <Trophy className="text-purple-400" size={24} />
+          </div>
+        </div>
       </div>
 
       {teams.length < 2 && (
-        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 text-yellow-800">
-          <p className="text-sm">⚠️ Add at least 2 teams before generating a bracket</p>
+        <div className="bg-red-50 border-2 border-red-100 rounded-2xl p-5 mb-6 text-red-600 flex items-center gap-3 animate-pulse">
+          <div className="bg-red-600 text-white p-1 rounded-lg">
+            <X size={16} />
+          </div>
+          <p className="text-sm font-bold">Add at least 2 teams before generating a bracket</p>
         </div>
       )}
 
       <button
         onClick={handleGenerate}
         disabled={disabled || teams.length < 2}
-        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2"
+        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-5 rounded-2xl hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 active:translate-y-0 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"
       >
-        Generate Bracket <ChevronRight size={20} />
+        Generate Championship Bracket <ChevronRight size={20} />
       </button>
     </div>
   );

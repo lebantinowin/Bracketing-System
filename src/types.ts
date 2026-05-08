@@ -36,6 +36,11 @@ export interface Bracket {
   updatedAt: number;
 }
 
+export interface User {
+  username: string;
+  role: 'admin' | 'judge';
+}
+
 export interface Tournament {
   id: string;
   name: string;

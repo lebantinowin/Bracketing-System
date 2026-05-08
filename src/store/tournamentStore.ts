@@ -1,12 +1,15 @@
 import { create } from 'zustand';
-import type { Tournament, Team, BracketFormat } from '../types';
+import type { Tournament, Team, BracketFormat, User } from '../types';
 import { generateBracket, updateMatchResult } from '../utils/bracketGenerator';
 
 interface TournamentStore {
   tournament: Tournament | null;
   tournaments: Tournament[];
+  user: User | null;
 
   // Actions
+  login: (username: string) => void;
+  logout: () => void;
   createTournament: (name: string, organizer: string, description: string) => void;
   generateBracket: (format: BracketFormat, bracketName: string) => void;
   addTeam: (team: Team) => void;
@@ -22,6 +25,18 @@ interface TournamentStore {
 export const useTournamentStore = create<TournamentStore>((set, get) => ({
   tournament: null,
   tournaments: JSON.parse(localStorage.getItem('tournaments') || '[]'),
+  user: JSON.parse(localStorage.getItem('user') || 'null'),
+
+  login: (username) => {
+    const user = { username, role: 'admin' };
+    set({ user });
+    localStorage.setItem('user', JSON.stringify(user));
+  },
+
+  logout: () => {
+    set({ user: null });
+    localStorage.removeItem('user');
+  },
 
   createTournament: (name, organizer, description) => {
     const now = Date.now();

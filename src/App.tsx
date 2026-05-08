@@ -4,7 +4,8 @@ import { TeamManagement } from './components/TeamManagement';
 import { FormatSelection } from './components/FormatSelection';
 import { BracketDisplay } from './components/BracketDisplay';
 import { ExportOptions } from './components/ExportOptions';
-import { Settings, Home, Save, Trash2, ExternalLink } from 'lucide-react';
+import { Login } from './components/Login';
+import { Settings, Home, Save, Trash2, ExternalLink, LogOut, User as UserIcon } from 'lucide-react';
 
 type View = 'welcome' | 'setup' | 'bracket' | 'export';
 
@@ -15,6 +16,8 @@ function App() {
   const [description, setDescription] = useState('');
   const [editMode, setEditMode] = useState(false);
 
+  const user = useTournamentStore((state) => state.user);
+  const logout = useTournamentStore((state) => state.logout);
   const tournament = useTournamentStore((state) => state.tournament);
   const createTournament = useTournamentStore((state) => state.createTournament);
   const addTeam = useTournamentStore((state) => state.addTeam);
@@ -88,6 +91,10 @@ function App() {
     }
   };
 
+  if (!user) {
+    return <Login />;
+  }
+
   if (!tournament && view === 'welcome') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex flex-col md:flex-row items-center justify-center p-4 gap-8">
@@ -96,6 +103,14 @@ function App() {
           <div className="bg-white rounded-2xl shadow-2xl p-8 overflow-hidden relative">
             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
             
+            <button 
+              onClick={() => logout()}
+              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-500 transition-colors z-10"
+              title="Logout"
+            >
+              <LogOut size={20} />
+            </button>
+
             <div className="relative text-center mb-8">
               <div className="inline-block bg-gradient-to-tr from-blue-600 to-purple-600 text-white p-4 rounded-2xl shadow-lg mb-4">
                 <Settings size={32} />
@@ -241,6 +256,24 @@ function App() {
             </div>
 
             <div className="flex items-center gap-6">
+              {/* User Profile */}
+              <div className="hidden lg:flex items-center gap-3 pr-6 border-r border-white border-opacity-10">
+                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
+                  <UserIcon size={20} />
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-xs font-black uppercase tracking-widest leading-none mb-1">{user.username}</span>
+                  <span className="text-[10px] text-blue-200 font-bold uppercase tracking-tighter leading-none opacity-70">{user.role}</span>
+                </div>
+                <button 
+                  onClick={() => logout()}
+                  className="ml-2 p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-200 hover:text-white"
+                  title="Logout"
+                >
+                  <LogOut size={18} />
+                </button>
+              </div>
+
               <div className="hidden md:flex items-center gap-4 text-sm font-bold">
                 <div className="bg-white bg-opacity-10 px-3 py-1.5 rounded-lg border border-white border-opacity-10">
                   <span className="text-blue-100 opacity-70 mr-2">TEAMS:</span>
