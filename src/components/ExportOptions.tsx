@@ -1,7 +1,7 @@
 import React from 'react';
 import type { Bracket } from '../types';
 import { exportToJSON, exportToCSV, exportToPDF, exportToHTML } from '../utils/exportUtils';
-import { Download, FileJson, FileText, FileSpreadsheet, File, ChevronRight, Trophy } from 'lucide-react';
+import { Download, FileJson, FileText, FileSpreadsheet, File, ChevronRight, Trophy, Shield } from 'lucide-react';
 
 interface ExportOptionsProps {
   bracket: Bracket;
@@ -11,45 +11,45 @@ export const ExportOptions: React.FC<ExportOptionsProps> = ({ bracket }) => {
   const exportOptions = [
     {
       id: 'json',
-      name: 'JSON',
-      description: 'Machine-readable format for data processing',
+      name: 'JSON DATA',
+      description: 'RAW SYSTEM ARRAY FOR EXTERNAL PROCESSING.',
       icon: FileJson,
       action: () => exportToJSON(bracket, `${bracket.name.replace(/\s+/g, '_')}.json`),
     },
     {
       id: 'csv',
-      name: 'CSV',
-      description: 'Spreadsheet compatible format',
+      name: 'CSV SHEET',
+      description: 'COMPATIBLE TABULAR MATRIX FORMAT.',
       icon: FileSpreadsheet,
       action: () => exportToCSV(bracket, `${bracket.name.replace(/\s+/g, '_')}.csv`),
     },
     {
       id: 'pdf',
-      name: 'PDF',
-      description: 'Professional document format',
+      name: 'OFFICIAL PDF',
+      description: 'PROFESSIONAL ARCHIVE ENCRYPTED DOCUMENT.',
       icon: FileText,
       action: () => exportToPDF(bracket, `${bracket.name.replace(/\s+/g, '_')}.pdf`),
     },
     {
       id: 'html',
-      name: 'HTML',
-      description: 'Web-ready format, printable',
+      name: 'HTML WEB',
+      description: 'HYPERTEXT BROADCAST READY MODULE.',
       icon: File,
       action: () => exportToHTML(bracket, `${bracket.name.replace(/\s+/g, '_')}.html`),
     },
   ];
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-indigo-50 rounded-full -mr-32 -mt-32 opacity-30 blur-3xl"></div>
+    <div className="metallic-card rounded-3xl p-8 border border-white/10 overflow-hidden relative">
+      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 opacity-20 blur-3xl"></div>
       
-      <div className="relative flex items-center gap-4 mb-8">
-        <div className="bg-slate-900 text-white p-3 rounded-xl shadow-lg">
-          <Download size={24} />
+      <div className="relative flex items-center gap-5 mb-12">
+        <div className="bg-white text-metallic-950 p-4 rounded-2xl shadow-xl border border-white/20 shine-effect">
+          <Download size={28} />
         </div>
         <div>
-          <h2 className="text-3xl font-black text-slate-800 tracking-tight">Export Engine</h2>
-          <p className="text-slate-500 font-medium mt-1">Generate professional reports and data files</p>
+          <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase">Data Extraction</h2>
+          <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">External Output Protocols</p>
         </div>
       </div>
 
@@ -60,33 +60,37 @@ export const ExportOptions: React.FC<ExportOptionsProps> = ({ bracket }) => {
             <button
               key={option.id}
               onClick={option.action}
-              className="relative p-6 rounded-2xl border-2 border-slate-100 bg-white hover:border-indigo-500 hover:shadow-2xl hover:shadow-indigo-500/10 hover:-translate-y-1 transition-all duration-500 text-left group"
+              className="relative p-8 rounded-3xl border border-white/5 bg-metallic-900/30 hover:border-white/40 hover:bg-white/5 hover:shadow-2xl hover:shadow-white/5 hover:-translate-y-2 transition-all duration-500 text-left group overflow-hidden"
             >
-              <div className="flex items-center mb-4">
-                <div className="p-3 bg-slate-50 rounded-xl group-hover:bg-indigo-500 group-hover:text-white transition-all duration-500">
+              <div className="absolute top-0 left-0 w-1 h-full bg-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
+              
+              <div className="flex items-center mb-6">
+                <div className="p-3 bg-metallic-950 rounded-xl border border-white/5 text-metallic-500 group-hover:text-white transition-all duration-500">
                   <Icon size={24} />
                 </div>
               </div>
-              <h3 className="font-black text-slate-800 text-lg group-hover:text-indigo-600 transition-colors">{option.name}</h3>
-              <p className="text-xs text-slate-500 font-medium mt-2 leading-relaxed">{option.description}</p>
+              <h3 className="font-black text-metallic-100 text-lg group-hover:text-white transition-colors uppercase tracking-tighter italic">{option.name}</h3>
+              <p className="text-[10px] text-metallic-600 font-black mt-3 leading-relaxed tracking-widest uppercase">{option.description}</p>
               
-              <div className="mt-4 flex items-center gap-2 text-xs font-black text-indigo-600 uppercase tracking-widest opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
-                Generate <ChevronRight size={14} />
+              <div className="mt-6 flex items-center gap-2 text-[9px] font-black text-white uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
+                INITIATE <ChevronRight size={14} />
               </div>
             </button>
           );
         })}
       </div>
 
-      <div className="mt-10 p-6 bg-slate-900 rounded-2xl relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
-        <div className="relative flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-500/20 rounded-xl flex items-center justify-center text-indigo-400">
-            <Trophy size={20} />
+      <div className="mt-12 p-8 bg-metallic-950 rounded-3xl relative overflow-hidden group border border-white/5 shadow-inner">
+        <div className="relative flex items-center gap-6">
+          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center text-metallic-400 group-hover:text-white transition-colors">
+            <Shield size={28} />
           </div>
-          <p className="text-sm font-bold text-slate-400">
-            <strong className="text-white">Pro Tip:</strong> Export your bracket after every major round to maintain a historical record of the tournament's progress.
-          </p>
+          <div>
+            <span className="text-[9px] font-black text-metallic-500 uppercase tracking-[0.4em] block mb-1">Archive Integrity Policy</span>
+            <p className="text-white font-black text-sm uppercase tracking-widest opacity-80 leading-relaxed">
+              Export protocols ensure parity between local synchronization and external archives. Maintain regular backups for system stability.
+            </p>
+          </div>
         </div>
       </div>
     </div>

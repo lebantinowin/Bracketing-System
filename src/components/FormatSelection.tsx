@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { BracketFormat, Team } from '../types';
 import { generateSingleElimination, generateDoubleElimination, generateRoundRobin } from '../utils/bracketGenerator';
-import { ChevronRight } from 'lucide-react';
+import { ChevronRight, Trophy, Target, RefreshCw, Repeat } from 'lucide-react';
 
 interface FormatSelectionProps {
   teams: Team[];
@@ -17,29 +17,29 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
   const [selectedFormat, setSelectedFormat] = useState<BracketFormat>('single-elimination');
   const [bracketName, setBracketName] = useState('Tournament 1');
 
-  const formats: Array<{ id: BracketFormat; name: string; description: string; icon: string }> = [
+  const formats: Array<{ id: BracketFormat; name: string; description: string; icon: React.ReactNode }> = [
     {
       id: 'single-elimination',
-      name: 'Single Elimination',
-      description: 'Lose once and you\'re out. Fast-paced, one champion.',
-      icon: '🎯',
+      name: 'Direct Elimination',
+      description: 'HIGH STAKES. ONE FAILURE EQUALS SYSTEM TERMINATION.',
+      icon: <Target size={32} />,
     },
     {
       id: 'double-elimination',
-      name: 'Double Elimination',
-      description: 'Losers bracket. Second chance for teams.',
-      icon: '🔄',
+      name: 'Resurrection Matrix',
+      description: 'LOWER BRACKET REDEPLOYMENT ENABLED. SECOND CHANCE ACTIVE.',
+      icon: <RefreshCw size={32} />,
     },
     {
       id: 'round-robin',
-      name: 'Round Robin',
-      description: 'Every team plays every other team. Comprehensive.',
-      icon: '🔁',
+      name: 'Full Simulation',
+      description: 'TOTAL COVERAGE. EVERY UNIT ENGAGES EVERY ADVERSARY.',
+      icon: <Repeat size={32} />,
     },
   ];
 
   const getPreview = () => {
-    if (teams.length === 0) return 'Add teams to see bracket preview';
+    if (teams.length === 0) return 'PENDING: ADD UNITS TO CALCULATE';
 
     let rounds = [];
     switch (selectedFormat) {
@@ -57,12 +57,12 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
     const totalMatches = rounds.reduce((sum, round) => sum + round.matches.length, 0);
     const totalRounds = rounds.length;
 
-    return `${totalRounds} rounds, ${totalMatches} matches`;
+    return `${totalRounds} STAGES // ${totalMatches} ENGAGEMENTS`;
   };
 
   const handleGenerate = () => {
     if (teams.length < 2) {
-      alert('Add at least 2 teams to generate a bracket');
+      alert('Minimum 2 units required for bracket generation');
       return;
     }
 
@@ -70,84 +70,76 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
   };
 
   return (
-    <div className="bg-white rounded-2xl shadow-xl p-8 border border-slate-100 overflow-hidden relative">
-      <div className="absolute top-0 left-0 w-64 h-64 bg-purple-50 rounded-full -ml-32 -mt-32 opacity-30 blur-3xl"></div>
+    <div className="metallic-card rounded-3xl p-8 border border-white/10 overflow-hidden relative">
+      <div className="absolute top-0 left-0 w-64 h-64 bg-white/5 rounded-full -ml-32 -mt-32 opacity-20 blur-3xl"></div>
       
-      <div className="relative mb-8">
-        <h2 className="text-3xl font-black text-slate-800 tracking-tight flex items-center gap-3">
-          <div className="w-2 h-8 bg-purple-600 rounded-full"></div>
-          Tournament Format
+      <div className="relative mb-10">
+        <h2 className="text-3xl font-black text-white tracking-tighter italic uppercase flex items-center gap-3">
+          <div className="w-1.5 h-8 bg-metallic-400 rounded-full"></div>
+          Engagement Protocol
         </h2>
-        <p className="text-slate-500 font-medium mt-1">Choose the competitive structure for your bracket</p>
+        <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">Select Tournament Matrix</p>
       </div>
 
-      <div className="mb-8 relative">
-        <label className="block text-[10px] font-black text-slate-400 uppercase mb-2 ml-1 tracking-tighter">Bracket Name</label>
+      <div className="mb-10 relative">
+        <label className="block text-[10px] font-black text-metallic-400 uppercase mb-2 ml-1 tracking-[0.3em]">Operation Codename</label>
         <input
           type="text"
           value={bracketName}
           onChange={(e) => setBracketName(e.target.value)}
-          placeholder="e.g., Grand Finals 2026"
+          placeholder="e.g., SECTOR-7 ALPHA"
           disabled={disabled}
-          className="w-full px-5 py-4 bg-slate-50 border-2 border-transparent rounded-2xl focus:outline-none focus:border-purple-500 focus:bg-white transition-all text-slate-800 font-bold disabled:opacity-50 shadow-sm"
+          className="w-full px-5 py-4 bg-metallic-900/50 border border-white/5 rounded-2xl focus:outline-none focus:border-metallic-400 transition-all text-white font-black uppercase tracking-tight disabled:opacity-50"
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 relative">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10 relative">
         {formats.map((format) => (
           <button
             key={format.id}
             onClick={() => setSelectedFormat(format.id)}
             disabled={disabled}
-            className={`group relative p-6 rounded-2xl border-2 transition-all duration-500 text-left ${
+            className={`group relative p-8 rounded-2xl border transition-all duration-500 text-left ${
               selectedFormat === format.id
-                ? 'border-purple-600 bg-purple-50 shadow-xl shadow-purple-500/10'
-                : 'border-slate-100 bg-white hover:border-slate-300'
+                ? 'border-white bg-white/10 shadow-[0_0_30px_rgba(255,255,255,0.05)]'
+                : 'border-white/5 bg-metallic-900/30 hover:border-white/20'
             } disabled:opacity-50 disabled:cursor-not-allowed`}
           >
-            <div className={`text-4xl mb-4 transform transition-transform group-hover:scale-110 duration-500 ${selectedFormat === format.id ? 'animate-bounce' : ''}`}>{format.icon}</div>
-            <h3 className={`font-black text-lg transition-colors ${selectedFormat === format.id ? 'text-purple-700' : 'text-slate-800'}`}>{format.name}</h3>
-            <p className="text-sm text-slate-500 font-medium mt-2 leading-relaxed">{format.description}</p>
+            <div className={`mb-6 transition-all duration-500 ${selectedFormat === format.id ? 'text-white scale-110' : 'text-metallic-600'}`}>
+              {format.icon}
+            </div>
+            <h3 className={`font-black text-lg transition-colors italic uppercase tracking-tighter ${selectedFormat === format.id ? 'text-white' : 'text-metallic-300'}`}>{format.name}</h3>
+            <p className="text-[10px] text-metallic-600 font-black mt-3 leading-relaxed tracking-widest">{format.description}</p>
             
             {selectedFormat === format.id && (
-              <div className="absolute top-4 right-4 w-6 h-6 bg-purple-600 rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
-                <div className="w-2 h-2 bg-white rounded-full"></div>
+              <div className="absolute top-4 right-4 w-5 h-5 bg-white rounded-full flex items-center justify-center shadow-lg animate-in zoom-in duration-300">
+                <div className="w-1.5 h-1.5 bg-metallic-950 rounded-full"></div>
               </div>
             )}
           </button>
         ))}
       </div>
 
-      <div className="bg-slate-900 rounded-2xl p-6 mb-8 relative overflow-hidden group">
-        <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 group-hover:scale-150 transition-transform duration-700"></div>
+      <div className="bg-metallic-950 rounded-2xl p-6 mb-10 relative overflow-hidden group border border-white/5 shadow-inner">
         <div className="relative flex items-center justify-between">
           <div>
-            <span className="text-[10px] font-black text-purple-400 uppercase tracking-widest block mb-1">Bracket Intelligence</span>
-            <p className="text-white font-bold text-lg">
+            <span className="text-[9px] font-black text-metallic-500 uppercase tracking-[0.4em] block mb-1">Matrix Intelligence</span>
+            <p className="text-white font-black text-xl italic uppercase tracking-tighter">
               {getPreview()}
             </p>
           </div>
-          <div className="p-3 bg-white/10 rounded-xl backdrop-blur-sm">
-            <Trophy className="text-purple-400" size={24} />
+          <div className="p-3 bg-white/5 rounded-xl border border-white/10 text-metallic-400">
+            <Trophy size={24} />
           </div>
         </div>
       </div>
 
-      {teams.length < 2 && (
-        <div className="bg-red-50 border-2 border-red-100 rounded-2xl p-5 mb-6 text-red-600 flex items-center gap-3 animate-pulse">
-          <div className="bg-red-600 text-white p-1 rounded-lg">
-            <X size={16} />
-          </div>
-          <p className="text-sm font-bold">Add at least 2 teams before generating a bracket</p>
-        </div>
-      )}
-
       <button
         onClick={handleGenerate}
         disabled={disabled || teams.length < 2}
-        className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-5 rounded-2xl hover:shadow-2xl hover:shadow-purple-500/30 hover:-translate-y-1 active:translate-y-0 disabled:from-slate-400 disabled:to-slate-500 disabled:cursor-not-allowed font-black text-sm uppercase tracking-widest transition-all flex items-center justify-center gap-3 shadow-xl"
+        className="w-full bg-white text-metallic-950 px-8 py-5 rounded-2xl hover:bg-metallic-100 hover:shadow-[0_0_30px_rgba(255,255,255,0.1)] hover:-translate-y-1 active:translate-y-0 transition-all font-black text-xs uppercase tracking-[0.3em] flex items-center justify-center gap-3"
       >
-        Generate Championship Bracket <ChevronRight size={20} />
+        Compile Engagement Matrix <ChevronRight size={20} />
       </button>
     </div>
   );

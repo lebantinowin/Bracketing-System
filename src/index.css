@@ -3,6 +3,21 @@
 @theme {
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-heading: "Outfit", system-ui, -apple-system, sans-serif;
+  
+  /* Metallic Gray Palette */
+  --color-metallic-950: #0a0a0c;
+  --color-metallic-900: #121214;
+  --color-metallic-800: #1e1e21;
+  --color-metallic-700: #2a2a2e;
+  --color-metallic-600: #3f3f46;
+  --color-metallic-500: #52525b;
+  --color-metallic-400: #71717a;
+  --color-metallic-300: #a1a1aa;
+  --color-metallic-200: #d4d4d8;
+  --color-metallic-100: #f4f4f5;
+  
+  --color-silver: #e2e8f0;
+  --color-steel: #94a3b8;
 }
 
 :root {
@@ -24,8 +39,12 @@ body {
   font-family: var(--sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #1e293b;
-  background-color: #f8fafc;
+  color: var(--color-metallic-200);
+  background-color: var(--color-metallic-950);
+  background-image: 
+    radial-gradient(at 0% 0%, rgba(30, 41, 59, 0.5) 0px, transparent 50%),
+    radial-gradient(at 100% 0%, rgba(15, 23, 42, 0.5) 0px, transparent 50%);
+  min-height: 100vh;
 }
 
 input, textarea, button, select {
@@ -37,20 +56,70 @@ input, textarea, button, select {
   min-height: 100svh;
 }
 
-/* Custom Scrollbar */
+/* Custom Scrollbar - Metallic Style */
 .custom-scrollbar::-webkit-scrollbar {
-  width: 6px;
+  width: 5px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-metallic-900);
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(0, 0, 0, 0.1);
+  background: var(--color-metallic-700);
   border-radius: 10px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(0, 0, 0, 0.2);
+  background: var(--color-metallic-600);
+}
+
+/* Metallic Textures */
+.metallic-card {
+  background: linear-gradient(135deg, rgba(30, 41, 59, 0.8) 0%, rgba(15, 23, 42, 0.8) 100%);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+}
+
+.metallic-border {
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+}
+
+.brushed-metal {
+  background-image: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 1px,
+    rgba(255, 255, 255, 0.02) 1px,
+    rgba(255, 255, 255, 0.02) 2px
+  );
+}
+
+/* Animations */
+@keyframes shine {
+  from { transform: translateX(-100%); }
+  to { transform: translateX(100%); }
+}
+
+.shine-effect {
+  position: relative;
+  overflow: hidden;
+}
+
+.shine-effect::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    rgba(255, 255, 255, 0.05),
+    transparent
+  );
+  animation: shine 3s infinite;
 }

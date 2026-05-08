@@ -8,7 +8,7 @@ interface TournamentStore {
   user: User | null;
 
   // Actions
-  login: (username: string) => void;
+  login: (username: string, password: string) => void;
   logout: () => void;
   createTournament: (name: string, organizer: string, description: string) => void;
   generateBracket: (format: BracketFormat, bracketName: string) => void;
@@ -27,10 +27,14 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
   tournaments: JSON.parse(localStorage.getItem('tournaments') || '[]'),
   user: JSON.parse(localStorage.getItem('user') || 'null'),
 
-  login: (username) => {
-    const user = { username, role: 'admin' };
-    set({ user });
-    localStorage.setItem('user', JSON.stringify(user));
+  login: (username, password) => {
+    if (username === 'admin' && password === 'admin123') {
+      const user = { username, role: 'admin' };
+      set({ user });
+      localStorage.setItem('user', JSON.stringify(user));
+    } else {
+      alert('INVALID ACCESS CREDENTIALS. SYSTEM LOCK ACTIVE.');
+    }
   },
 
   logout: () => {

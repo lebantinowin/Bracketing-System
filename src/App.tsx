@@ -97,68 +97,68 @@ function App() {
 
   if (!tournament && view === 'welcome') {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-600 via-purple-600 to-indigo-700 flex flex-col md:flex-row items-center justify-center p-4 gap-8">
+      <div className="min-h-screen bg-metallic-950 flex flex-col md:flex-row items-center justify-center p-4 gap-8 brushed-metal">
         {/* Creation Form */}
         <div className="w-full max-w-md">
-          <div className="bg-white rounded-2xl shadow-2xl p-8 overflow-hidden relative">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full -mr-16 -mt-16 opacity-50"></div>
+          <div className="metallic-card rounded-3xl p-8 overflow-hidden relative border border-white/10">
+            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 opacity-20"></div>
             
             <button 
               onClick={() => logout()}
-              className="absolute top-4 right-4 p-2 text-slate-400 hover:text-red-500 transition-colors z-10"
+              className="absolute top-4 right-4 p-2 text-metallic-500 hover:text-white transition-colors z-10"
               title="Logout"
             >
               <LogOut size={20} />
             </button>
 
             <div className="relative text-center mb-8">
-              <div className="inline-block bg-gradient-to-tr from-blue-600 to-purple-600 text-white p-4 rounded-2xl shadow-lg mb-4">
+              <div className="inline-block bg-gradient-to-tr from-metallic-700 to-metallic-500 text-white p-4 rounded-2xl shadow-xl mb-4 border border-white/20 shine-effect">
                 <Settings size={32} />
               </div>
-              <h1 className="text-4xl font-black text-gray-800 tracking-tight">Nexus League</h1>
-              <p className="text-gray-500 font-medium mt-1">Tournament Management System</p>
+              <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">Nexus<span className="text-metallic-400">System</span></h1>
+              <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">Championship Controller</p>
             </div>
 
             <form onSubmit={handleCreateTournament} className="space-y-4 relative">
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Tournament Name</label>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Tournament Designation</label>
                 <input
                   type="text"
                   value={tournamentName}
                   onChange={(e) => setTournamentName(e.target.value)}
-                  placeholder="e.g., Spring Championship 2026"
-                  className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-medium"
+                  placeholder="e.g., IRON GAUNTLET 2026"
+                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
                   autoFocus
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Organizer Name</label>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Lead Organizer</label>
                 <input
                   type="text"
                   value={organizerName}
                   onChange={(e) => setOrganizerName(e.target.value)}
-                  placeholder="Your name or organization"
-                  className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-medium"
+                  placeholder="COMMANDER NAME"
+                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
                 />
               </div>
 
-              <div>
-                <label className="block text-sm font-bold text-gray-700 mb-2 uppercase tracking-wider">Description (Optional)</label>
+              <div className="space-y-2">
+                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Briefing</label>
                 <textarea
                   value={description}
                   onChange={(e) => setDescription(e.target.value)}
-                  placeholder="Add details about your tournament..."
-                  className="w-full px-4 py-3 bg-gray-50 border-2 border-transparent rounded-xl focus:outline-none focus:border-blue-500 focus:bg-white transition-all text-gray-800 font-medium"
+                  placeholder="ADD MISSION DETAILS..."
+                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
                   rows={3}
                 />
               </div>
 
               <button
                 type="submit"
-                className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white font-bold py-4 rounded-xl shadow-xl hover:shadow-2xl hover:-translate-y-0.5 active:translate-y-0 transition-all text-lg"
+                className="w-full bg-gradient-to-r from-metallic-100 to-white text-metallic-950 font-black py-4 rounded-xl shadow-2xl hover:shadow-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm uppercase tracking-[0.2em]"
               >
-                Start New Tournament
+                Initialize Operation
               </button>
             </form>
           </div>
@@ -167,26 +167,26 @@ function App() {
         {/* Recent Tournaments */}
         {tournaments.length > 0 && (
           <div className="w-full max-w-md">
-            <div className="bg-white bg-opacity-10 backdrop-blur-lg rounded-2xl p-8 border border-white border-opacity-20 shadow-2xl">
-              <h2 className="text-2xl font-bold text-white mb-6 flex items-center gap-3">
-                <div className="w-2 h-8 bg-blue-400 rounded-full"></div>
-                Recent Tournaments
+            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
+              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-3 italic uppercase tracking-tighter">
+                <div className="w-1 h-6 bg-metallic-400 rounded-full"></div>
+                Archives
               </h2>
               
-              <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {tournaments.slice().reverse().map((t) => (
                   <div 
                     key={t.id}
                     onClick={() => handleLoadTournament(t)}
-                    className="group bg-white bg-opacity-95 rounded-xl p-4 cursor-pointer hover:bg-white transition-all hover:scale-[1.02] active:scale-[0.98] shadow-md flex justify-between items-center"
+                    className="group bg-metallic-800/50 rounded-xl p-4 cursor-pointer hover:bg-metallic-700/50 transition-all hover:translate-x-1 border border-white/5 flex justify-between items-center shadow-lg"
                   >
                     <div>
-                      <h3 className="font-bold text-gray-800 group-hover:text-blue-600 transition-colors">{t.name}</h3>
+                      <h3 className="font-bold text-metallic-200 group-hover:text-white transition-colors uppercase text-sm tracking-tight">{t.name}</h3>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs font-semibold text-gray-500 bg-gray-100 px-2 py-0.5 rounded uppercase">
+                        <span className="text-[10px] font-black text-metallic-500 bg-metallic-900/50 px-2 py-0.5 rounded border border-white/5 uppercase tracking-tighter">
                           {t.bracket.format.replace('-', ' ')}
                         </span>
-                        <span className="text-xs text-gray-400">
+                        <span className="text-[10px] font-bold text-metallic-600">
                           {new Date(t.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
@@ -195,21 +195,21 @@ function App() {
                     <div className="flex items-center gap-2">
                       <button 
                         onClick={(e) => handleDeleteTournament(e, t.id)}
-                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all opacity-0 group-hover:opacity-100"
-                        title="Delete Tournament"
+                        className="p-2 text-metallic-600 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
+                        title="Purge"
                       >
-                        <Trash2 size={18} />
+                        <Trash2 size={16} />
                       </button>
-                      <div className="text-blue-500 opacity-0 group-hover:opacity-100 transition-all">
-                        <ExternalLink size={18} />
+                      <div className="text-metallic-400 opacity-0 group-hover:opacity-100 transition-all">
+                        <ExternalLink size={16} />
                       </div>
                     </div>
                   </div>
                 ))}
               </div>
               
-              <p className="text-blue-100 text-sm mt-6 text-center italic opacity-70">
-                Your data is saved locally in this browser.
+              <p className="text-metallic-600 text-[9px] mt-6 text-center font-black uppercase tracking-[0.3em] opacity-50">
+                LOCAL STORAGE SECURED
               </p>
             </div>
           </div>
@@ -223,12 +223,12 @@ function App() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen bg-metallic-950 text-metallic-200 brushed-metal">
       {/* Header */}
-      <header className="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg sticky top-0 z-50 overflow-hidden">
-        <div className="absolute top-0 left-0 w-full h-1 bg-white bg-opacity-20">
+      <header className="bg-metallic-900 border-b border-white/10 sticky top-0 z-50 overflow-hidden backdrop-blur-xl">
+        <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
           <div 
-            className="h-full bg-green-400 shadow-[0_0_10px_rgba(74,222,128,0.8)] transition-all duration-1000"
+            className="h-full bg-metallic-400 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-1000"
             style={{ 
               width: `${(() => {
                 const totalMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.team1 && m.team2).length, 0);
@@ -241,47 +241,51 @@ function App() {
 
         <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center">
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-6">
               <button
                 onClick={handleReset}
-                className="p-2 hover:bg-white hover:bg-opacity-20 rounded-xl transition-all hover:rotate-12"
-                title="Home"
+                className="p-2.5 bg-metallic-800 text-metallic-300 hover:text-white hover:bg-metallic-700 rounded-xl transition-all border border-white/5"
+                title="Return to Core"
               >
-                <Home size={24} />
+                <Home size={20} />
               </button>
               <div>
-                <h1 className="text-2xl font-black tracking-tight">{tournament.name}</h1>
-                <p className="text-xs text-blue-100 font-medium uppercase tracking-widest opacity-80">Organizer: {tournament.organizer}</p>
+                <h1 className="text-xl font-black text-white uppercase tracking-tighter italic">{tournament.name}</h1>
+                <div className="flex items-center gap-2 mt-1">
+                  <span className="text-[10px] text-metallic-500 font-black uppercase tracking-[0.2em] opacity-80">Sector: {tournament.organizer}</span>
+                  <div className="w-1 h-1 bg-metallic-700 rounded-full"></div>
+                  <span className="text-[10px] text-metallic-500 font-black uppercase tracking-[0.2em] opacity-80">{tournament.bracket.format.replace('-', ' ')}</span>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-6">
               {/* User Profile */}
-              <div className="hidden lg:flex items-center gap-3 pr-6 border-r border-white border-opacity-10">
-                <div className="w-10 h-10 bg-white/20 rounded-full flex items-center justify-center border border-white/30">
+              <div className="hidden lg:flex items-center gap-4 pr-6 border-r border-white/10">
+                <div className="w-10 h-10 bg-metallic-800 rounded-xl flex items-center justify-center border border-white/10 text-metallic-400">
                   <UserIcon size={20} />
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-xs font-black uppercase tracking-widest leading-none mb-1">{user.username}</span>
-                  <span className="text-[10px] text-blue-200 font-bold uppercase tracking-tighter leading-none opacity-70">{user.role}</span>
+                  <span className="text-[10px] font-black uppercase tracking-widest text-white leading-none mb-1">{user.username}</span>
+                  <span className="text-[9px] text-metallic-500 font-bold uppercase tracking-tighter leading-none opacity-70">{user.role}</span>
                 </div>
                 <button 
                   onClick={() => logout()}
-                  className="ml-2 p-2 hover:bg-white/10 rounded-lg transition-colors text-blue-200 hover:text-white"
-                  title="Logout"
+                  className="ml-2 p-2 text-metallic-600 hover:text-red-400 transition-colors"
+                  title="Shutdown Session"
                 >
-                  <LogOut size={18} />
+                  <LogOut size={16} />
                 </button>
               </div>
 
-              <div className="hidden md:flex items-center gap-4 text-sm font-bold">
-                <div className="bg-white bg-opacity-10 px-3 py-1.5 rounded-lg border border-white border-opacity-10">
-                  <span className="text-blue-100 opacity-70 mr-2">TEAMS:</span>
-                  <span>{tournament.bracket.teams.length}</span>
+              <div className="hidden md:flex items-center gap-6 text-[10px] font-black tracking-widest uppercase">
+                <div className="flex flex-col items-end">
+                  <span className="text-metallic-600">Active Teams</span>
+                  <span className="text-white text-lg leading-tight">{tournament.bracket.teams.length}</span>
                 </div>
-                <div className="bg-white bg-opacity-10 px-3 py-1.5 rounded-lg border border-white border-opacity-10">
-                  <span className="text-blue-100 opacity-70 mr-2">PROGRESS:</span>
-                  <span>
+                <div className="flex flex-col items-end">
+                  <span className="text-metallic-600">Completion</span>
+                  <span className="text-white text-lg leading-tight">
                     {(() => {
                       const totalMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.team1 && m.team2).length, 0);
                       const completedMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.winner).length, 0);
@@ -293,9 +297,9 @@ function App() {
 
               <button
                 onClick={handleSave}
-                className="flex items-center gap-2 bg-white text-blue-600 px-5 py-2.5 rounded-xl font-bold hover:shadow-xl hover:-translate-y-0.5 active:translate-y-0 transition-all"
+                className="flex items-center gap-2 bg-white text-metallic-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-metallic-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
               >
-                <Save size={18} /> Save
+                <Save size={16} /> Save Data
               </button>
             </div>
           </div>
@@ -305,16 +309,16 @@ function App() {
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-2 mb-8">
+        <div className="flex flex-wrap gap-3 mb-10">
           <button
             onClick={() => setView('setup')}
-            className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+            className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
               view === 'setup'
-                ? 'bg-blue-600 text-white shadow-lg'
-                : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-600'
+                ? 'bg-white text-metallic-950 border-white shadow-xl'
+                : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
             }`}
           >
-            Setup
+            Config
           </button>
 
           {tournament.bracket.rounds.length > 0 && (
@@ -324,13 +328,13 @@ function App() {
                   setView('bracket');
                   setEditMode(false);
                 }}
-                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
                   view === 'bracket' && !editMode
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-600'
+                    ? 'bg-white text-metallic-950 border-white shadow-xl'
+                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
                 }`}
               >
-                Bracket
+                Tactical View
               </button>
 
               <button
@@ -338,67 +342,69 @@ function App() {
                   setView('bracket');
                   setEditMode(true);
                 }}
-                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
                   view === 'bracket' && editMode
-                    ? 'bg-green-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-green-600'
+                    ? 'bg-metallic-100 text-metallic-950 border-white shadow-xl'
+                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
                 }`}
               >
-                Enter Scores
+                Entry Mode
               </button>
 
               <button
                 onClick={() => setView('export')}
-                className={`px-6 py-3 rounded-lg font-semibold transition-colors ${
+                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
                   view === 'export'
-                    ? 'bg-blue-600 text-white shadow-lg'
-                    : 'bg-white text-gray-700 border-2 border-gray-200 hover:border-blue-600'
+                    ? 'bg-white text-metallic-950 border-white shadow-xl'
+                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
                 }`}
               >
-                Export
+                Data Export
               </button>
             </>
           )}
         </div>
 
-        {/* View: Setup */}
-        {view === 'setup' && (
-          <div className="space-y-8">
-            <TeamManagement
-              teams={tournament.bracket.teams}
-              onAddTeam={addTeam}
-              onRemoveTeam={removeTeam}
-              onUpdateTeam={updateTeam}
+        {/* View Content */}
+        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
+          {view === 'setup' && (
+            <div className="space-y-8">
+              <TeamManagement
+                teams={tournament.bracket.teams}
+                onAddTeam={addTeam}
+                onRemoveTeam={removeTeam}
+                onUpdateTeam={updateTeam}
+              />
+
+              <FormatSelection
+                teams={tournament.bracket.teams}
+                onFormatSelected={handleGenerateBracket}
+                disabled={tournament.bracket.teams.length < 2}
+              />
+            </div>
+          )}
+
+          {view === 'bracket' && tournament.bracket.rounds.length > 0 && (
+            <BracketDisplay
+              bracket={tournament.bracket}
+              onMatchUpdate={updateMatchResult}
+              editMode={editMode}
             />
+          )}
 
-            <FormatSelection
-              teams={tournament.bracket.teams}
-              onFormatSelected={handleGenerateBracket}
-              disabled={tournament.bracket.teams.length < 2}
-            />
-          </div>
-        )}
+          {view === 'export' && tournament.bracket.rounds.length > 0 && (
+            <ExportOptions bracket={tournament.bracket} />
+          )}
 
-        {/* View: Bracket */}
-        {view === 'bracket' && tournament.bracket.rounds.length > 0 && (
-          <BracketDisplay
-            bracket={tournament.bracket}
-            onMatchUpdate={updateMatchResult}
-            editMode={editMode}
-          />
-        )}
-
-        {/* View: Export */}
-        {view === 'export' && tournament.bracket.rounds.length > 0 && (
-          <ExportOptions bracket={tournament.bracket} />
-        )}
-
-        {/* Empty State */}
-        {view === 'bracket' && tournament.bracket.rounds.length === 0 && (
-          <div className="bg-white rounded-lg shadow-md p-12 text-center">
-            <p className="text-gray-500 text-lg">Generate a bracket to view tournament details</p>
-          </div>
-        )}
+          {/* Empty State */}
+          {view === 'bracket' && tournament.bracket.rounds.length === 0 && (
+            <div className="metallic-card rounded-3xl p-20 text-center border-2 border-dashed border-white/10">
+              <Trophy size={64} className="mx-auto mb-6 text-metallic-700" />
+              <p className="text-metallic-400 text-lg font-black uppercase tracking-widest">Bracket Engine Offline</p>
+              <p className="text-metallic-600 mt-2">Initialize configuration to generate tournament matrix</p>
+            </div>
+          )}
+        </div>
       </main>
     </div>
   );
