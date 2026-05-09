@@ -1,6 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import type { Team } from '../types';
-import { X, Plus, Edit2, Shield, Users } from 'lucide-react';
+import { X, Plus, Edit2, Users, Upload, Image as ImageIcon } from 'lucide-react';
 
 interface TeamManagementProps {
   teams: Team[];
@@ -17,159 +17,186 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
 }) => {
   const [showForm, setShowForm] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
-  const [formData, setFormData] = useState({ name: '', seed: '' });
+  const [formData, setFormData] = useState({ name: '', seed: '', logo: '' });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFormData(prev => ({ ...prev, logo: reader.result as string }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const getInitials = (name: string) => name.substring(0, 2).toUpperCase();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.name.trim()) {
-      alert('Team name is required');
-      return;
-    }
+    if (!formData.name.trim()) { alert('Team name is required'); return; }
 
     const team: Team = {
       id: editingId || `team-${Date.now()}`,
       name: formData.name,
       seed: formData.seed ? parseInt(formData.seed) : undefined,
+      logo: formData.logo || undefined
     };
 
-    if (editingId) {
-      onUpdateTeam(team);
-      setEditingId(null);
-    } else {
-      onAddTeam(team);
-    }
+    if (editingId) { onUpdateTeam(team); setEditingId(null); }
+    else { onAddTeam(team); }
 
-    setFormData({ name: '', seed: '' });
+    setFormData({ name: '', seed: '', logo: '' });
     setShowForm(false);
   };
 
   const handleEdit = (team: Team) => {
     setEditingId(team.id);
-    setFormData({
-      name: team.name,
-      seed: team.seed ? String(team.seed) : '',
-    });
+    setFormData({ name: team.name, seed: team.seed ? String(team.seed) : '', logo: team.logo || '' });
     setShowForm(true);
   };
 
   const handleCancel = () => {
     setShowForm(false);
     setEditingId(null);
-    setFormData({ name: '', seed: '' });
+    setFormData({ name: '', seed: '', logo: '' });
   };
 
   return (
-    <div className="metallic-card rounded-3xl p-8 border border-white/10 overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 opacity-20 blur-3xl"></div>
-      
-      <div className="relative flex justify-between items-center mb-10">
+    <div className="card">
+
+      {/* Header */}
+      <div className="flex items-start justify-between mb-6">
         <div>
-          <h2 className="text-3xl font-black text-white tracking-tighter italic uppercase flex items-center gap-3">
-            <div className="w-1.5 h-8 bg-metallic-400 rounded-full"></div>
-            Combatants
-          </h2>
-          <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">Deployment Roster</p>
+          <h2 className="heading text-xl">Participating Teams</h2>
+          <p className="text-sm text-metallic-500 mt-1">Manage participants and seeding</p>
         </div>
-        
         {!showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="bg-white text-metallic-950 px-6 py-3 rounded-xl hover:bg-metallic-200 transition-all flex items-center gap-2 font-black text-[10px] uppercase tracking-widest shadow-lg shadow-white/5"
+            className="metallic-accent flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-[.98] transition-all shrink-0"
           >
-            <Plus size={18} /> Register Unit
+            <Plus size={15} /> Add Team
           </button>
         )}
       </div>
 
+      {/* Inline form */}
       {showForm && (
-        <form onSubmit={handleSubmit} className="relative mb-10 p-6 bg-metallic-900/50 rounded-2xl border border-white/10 animate-in fade-in zoom-in duration-300">
-          <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-            <div className="md:col-span-7">
-              <label className="block text-[10px] font-black text-metallic-400 uppercase mb-2 ml-1 tracking-widest">Unit Designation</label>
-              <input
-                type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                placeholder="ENTER UNIT NAME"
-                className="w-full px-4 py-3 bg-metallic-950 border border-white/5 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-800"
-                autoFocus
-              />
-            </div>
-            <div className="md:col-span-2">
-              <label className="block text-[10px] font-black text-metallic-400 uppercase mb-2 ml-1 tracking-widest">Priority</label>
-              <input
-                type="number"
-                value={formData.seed}
-                onChange={(e) => setFormData({ ...formData, seed: e.target.value })}
-                placeholder="--"
-                className="w-full px-4 py-3 bg-metallic-950 border border-white/5 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-800"
-                min="1"
-              />
-            </div>
-            <div className="md:col-span-3 flex items-end gap-3">
-              <button
-                type="submit"
-                className="flex-1 bg-metallic-700 text-white px-4 py-3 rounded-xl hover:bg-metallic-600 font-black text-[10px] uppercase tracking-widest shadow-lg transition-all"
-              >
-                {editingId ? 'Update' : 'Deploy'}
-              </button>
-              <button
-                type="button"
-                onClick={handleCancel}
-                className="px-4 py-3 bg-metallic-800 text-metallic-500 rounded-xl hover:bg-metallic-700 hover:text-white transition-all"
-              >
-                <X size={18} />
-              </button>
-            </div>
-          </div>
-        </form>
-      )}
-
-      <div className="relative grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {teams.map((team) => (
-          <div key={team.id} className="group relative p-5 bg-metallic-900/30 rounded-2xl border border-white/5 hover:border-white/20 transition-all hover:bg-metallic-800/30">
-            <div className="flex justify-between items-start">
-              <div className="flex items-center gap-4">
-                <div className="w-12 h-12 bg-metallic-900 rounded-xl flex items-center justify-center text-metallic-400 border border-white/5 group-hover:bg-metallic-100 group-hover:text-metallic-950 transition-all duration-500">
-                  <span className="text-xl font-black">{team.seed || '?'}</span>
-                </div>
-                <div>
-                  <h3 className="font-black text-metallic-100 text-lg group-hover:text-white transition-colors uppercase tracking-tight italic">{team.name}</h3>
-                  <p className="text-[9px] font-bold text-metallic-600 uppercase tracking-[0.2em]">SIGNATURE: {team.id.split('-')[1]}</p>
-                </div>
+        <div className="mb-6 p-5 bg-bg rounded-xl border border-metallic-300 fade-up">
+          <p className="label-xs mb-4">{editingId ? 'Edit Team' : 'New Team'}</p>
+          <form onSubmit={handleSubmit}>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              <div className="md:col-span-1">
+                <input type="file" accept="image/*" className="hidden" ref={fileInputRef} onChange={handleLogoUpload} />
+                <button type="button" onClick={() => fileInputRef.current?.click()} className="w-full aspect-square rounded-lg border border-border bg-base flex flex-col items-center justify-center text-secondary hover:border-primary hover:text-primary transition-all overflow-hidden relative group">
+                  {formData.logo ? (
+                    <>
+                      <img src={formData.logo} alt="Logo" className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-base/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"><Upload size={14} /></div>
+                    </>
+                  ) : <ImageIcon size={18} />}
+                </button>
               </div>
-              <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-all transform translate-x-2 group-hover:translate-x-0">
+              <div className="md:col-span-6">
+                <label className="label-xs mb-1.5 block">Team Name</label>
+                <input
+                  type="text"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="Enter team name"
+                  className="input-base"
+                  autoFocus
+                />
+              </div>
+              <div className="md:col-span-2">
+                <label className="label-xs mb-1.5 block">Seed (Opt)</label>
+                <input
+                  type="number"
+                  value={formData.seed}
+                  onChange={(e) => setFormData({ ...formData, seed: e.target.value })}
+                  placeholder="#"
+                  className="input-base"
+                  min="1"
+                />
+              </div>
+              <div className="md:col-span-3 flex items-end gap-2 pb-[1px]">
                 <button
-                  onClick={() => handleEdit(team)}
-                  className="p-2 text-metallic-500 hover:text-white transition-all"
+                  type="submit"
+                  className="flex-1 metallic-accent text-white px-4 py-2.5 rounded-lg font-semibold text-sm hover:opacity-90 active:scale-[.98] transition-all"
                 >
-                  <Edit2 size={16} />
+                  {editingId ? 'Update' : 'Save'}
                 </button>
                 <button
-                  onClick={() => onRemoveTeam(team.id)}
-                  className="p-2 text-metallic-500 hover:text-red-400 transition-all"
+                  type="button"
+                  onClick={handleCancel}
+                  className="p-2.5 bg-surface border border-metallic-300 text-metallic-500 hover:text-metallic-900 hover:bg-bg rounded-lg transition-all"
                 >
                   <X size={16} />
                 </button>
               </div>
             </div>
-          </div>
-        ))}
-      </div>
-
-      {teams.length === 0 && !showForm && (
-        <div className="relative text-center py-20 bg-metallic-900/20 rounded-3xl border-2 border-dashed border-white/5">
-          <Users size={48} className="mx-auto mb-4 text-metallic-800" />
-          <h3 className="text-xl font-black text-metallic-400 uppercase tracking-tighter italic">No Active Combatants</h3>
-          <p className="text-metallic-600 text-xs font-bold uppercase tracking-widest mt-2">Initialize the roster to begin deployment.</p>
-          <button
-            onClick={() => setShowForm(true)}
-            className="mt-8 bg-white/10 text-white px-8 py-3 rounded-xl hover:bg-white/20 font-black text-[10px] uppercase tracking-widest border border-white/10 transition-all"
-          >
-            Register First Unit
-          </button>
+          </form>
         </div>
+      )}
+
+      {/* Team grid */}
+      {teams.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-3">
+          {teams.map((team, idx) => (
+            <div
+              key={team.id}
+              className="group flex items-center justify-between gap-3 px-4 py-3 bg-bg rounded-xl border border-metallic-300 hover:border-metallic-500 transition-all"
+            >
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="flex items-center gap-2">
+                  <span className="shrink-0 w-6 h-6 flex items-center justify-center rounded bg-surface border border-border text-xs font-mono text-secondary">
+                    {team.seed ?? idx + 1}
+                  </span>
+                  {team.logo ? (
+                    <img src={team.logo} alt={team.name} className="w-8 h-8 rounded-full object-cover border border-border bg-base shrink-0" />
+                  ) : (
+                    <div className="w-8 h-8 rounded-full bg-base border border-border flex items-center justify-center text-xs font-bold text-secondary shrink-0">
+                      {getInitials(team.name)}
+                    </div>
+                  )}
+                </div>
+                <span className="font-bold text-primary text-sm truncate">{team.name}</span>
+              </div>
+              <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                <button
+                  onClick={() => handleEdit(team)}
+                  className="p-1.5 text-metallic-400 hover:text-metallic-900 hover:bg-metallic-200 rounded-lg transition-all"
+                  title="Edit"
+                >
+                  <Edit2 size={13} />
+                </button>
+                <button
+                  onClick={() => onRemoveTeam(team.id)}
+                  className="p-1.5 text-metallic-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                  title="Remove"
+                >
+                  <X size={13} />
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : (
+        !showForm && (
+          <div className="text-center py-14 border border-dashed border-metallic-300 rounded-xl bg-bg">
+            <Users size={28} className="mx-auto mb-3 text-metallic-400" />
+            <h3 className="text-sm font-bold text-metallic-700">No teams yet</h3>
+            <p className="text-xs text-metallic-500 mt-1 mb-4">Add participants to get started.</p>
+            <button
+              onClick={() => setShowForm(true)}
+              className="metallic-accent text-white px-5 py-2 rounded-lg font-semibold text-sm hover:opacity-90 active:scale-[.98] transition-all"
+            >
+              Add First Team
+            </button>
+          </div>
+        )
       )}
     </div>
   );
