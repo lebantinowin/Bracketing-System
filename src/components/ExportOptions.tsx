@@ -1,96 +1,90 @@
 import React from 'react';
 import type { Bracket } from '../types';
 import { exportToJSON, exportToCSV, exportToPDF, exportToHTML } from '../utils/exportUtils';
-import { Download, FileJson, FileText, FileSpreadsheet, File, ChevronRight, Trophy, Shield } from 'lucide-react';
+import { Download, FileJson, FileText, FileSpreadsheet, File, ChevronRight, Info } from 'lucide-react';
 
 interface ExportOptionsProps {
   bracket: Bracket;
 }
 
 export const ExportOptions: React.FC<ExportOptionsProps> = ({ bracket }) => {
+  const slug = bracket.name.replace(/\s+/g, '_');
+
   const exportOptions = [
     {
       id: 'json',
-      name: 'JSON DATA',
-      description: 'RAW SYSTEM ARRAY FOR EXTERNAL PROCESSING.',
+      name: 'JSON',
+      description: 'Raw data for external processing.',
       icon: FileJson,
-      action: () => exportToJSON(bracket, `${bracket.name.replace(/\s+/g, '_')}.json`),
+      action: () => exportToJSON(bracket, `${slug}.json`),
     },
     {
       id: 'csv',
-      name: 'CSV SHEET',
-      description: 'COMPATIBLE TABULAR MATRIX FORMAT.',
+      name: 'CSV Spreadsheet',
+      description: 'Tabular format for spreadsheet apps.',
       icon: FileSpreadsheet,
-      action: () => exportToCSV(bracket, `${bracket.name.replace(/\s+/g, '_')}.csv`),
+      action: () => exportToCSV(bracket, `${slug}.csv`),
     },
     {
       id: 'pdf',
-      name: 'OFFICIAL PDF',
-      description: 'PROFESSIONAL ARCHIVE ENCRYPTED DOCUMENT.',
+      name: 'PDF Document',
+      description: 'Print-ready professional document.',
       icon: FileText,
-      action: () => exportToPDF(bracket, `${bracket.name.replace(/\s+/g, '_')}.pdf`),
+      action: () => exportToPDF(bracket, `${slug}.pdf`),
     },
     {
       id: 'html',
-      name: 'HTML WEB',
-      description: 'HYPERTEXT BROADCAST READY MODULE.',
+      name: 'HTML Page',
+      description: 'Interactive browser-ready format.',
       icon: File,
-      action: () => exportToHTML(bracket, `${bracket.name.replace(/\s+/g, '_')}.html`),
+      action: () => exportToHTML(bracket, `${slug}.html`),
     },
   ];
 
   return (
-    <div className="metallic-card rounded-3xl p-8 border border-white/10 overflow-hidden relative">
-      <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -mr-32 -mt-32 opacity-20 blur-3xl"></div>
-      
-      <div className="relative flex items-center gap-5 mb-12">
-        <div className="bg-white text-metallic-950 p-4 rounded-2xl shadow-xl border border-white/20 shine-effect">
-          <Download size={28} />
+    <div className="card">
+
+      {/* Header */}
+      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-metallic-300">
+        <div className="w-9 h-9 bg-bg border border-metallic-300 rounded-xl flex items-center justify-center text-metallic-700">
+          <Download size={18} />
         </div>
         <div>
-          <h2 className="text-4xl font-black text-white tracking-tighter italic uppercase">Data Extraction</h2>
-          <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">External Output Protocols</p>
+          <h2 className="heading text-xl">Export Options</h2>
+          <p className="text-sm text-metallic-500 mt-0.5">Download bracket data and reports</p>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative">
-        {exportOptions.map((option) => {
-          const Icon = option.icon;
-          return (
-            <button
-              key={option.id}
-              onClick={option.action}
-              className="relative p-8 rounded-3xl border border-white/5 bg-metallic-900/30 hover:border-white/40 hover:bg-white/5 hover:shadow-2xl hover:shadow-white/5 hover:-translate-y-2 transition-all duration-500 text-left group overflow-hidden"
-            >
-              <div className="absolute top-0 left-0 w-1 h-full bg-white opacity-0 group-hover:opacity-100 transition-opacity"></div>
-              
-              <div className="flex items-center mb-6">
-                <div className="p-3 bg-metallic-950 rounded-xl border border-white/5 text-metallic-500 group-hover:text-white transition-all duration-500">
-                  <Icon size={24} />
-                </div>
-              </div>
-              <h3 className="font-black text-metallic-100 text-lg group-hover:text-white transition-colors uppercase tracking-tighter italic">{option.name}</h3>
-              <p className="text-[10px] text-metallic-600 font-black mt-3 leading-relaxed tracking-widest uppercase">{option.description}</p>
-              
-              <div className="mt-6 flex items-center gap-2 text-[9px] font-black text-white uppercase tracking-[0.3em] opacity-0 group-hover:opacity-100 transition-all transform translate-x-[-10px] group-hover:translate-x-0">
-                INITIATE <ChevronRight size={14} />
-              </div>
-            </button>
-          );
-        })}
+      {/* Export cards */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
+        {exportOptions.map(({ id, name, description, icon: Icon, action }) => (
+          <button
+            key={id}
+            onClick={action}
+            className="group p-5 rounded-xl border border-metallic-300 bg-surface hover:border-metallic-600 hover:shadow-sm transition-all text-left flex flex-col gap-3 active:scale-[.98]"
+          >
+            <span className="text-metallic-500 group-hover:text-metallic-900 transition-colors">
+              <Icon size={22} />
+            </span>
+            <div className="flex-1">
+              <p className="font-semibold text-sm text-metallic-900">{name}</p>
+              <p className="text-xs text-metallic-500 mt-0.5 leading-snug">{description}</p>
+            </div>
+            <div className="flex items-center gap-1 label-xs text-metallic-500 group-hover:text-metallic-900 transition-colors">
+              Export <ChevronRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
+            </div>
+          </button>
+        ))}
       </div>
 
-      <div className="mt-12 p-8 bg-metallic-950 rounded-3xl relative overflow-hidden group border border-white/5 shadow-inner">
-        <div className="relative flex items-center gap-6">
-          <div className="w-14 h-14 bg-white/5 rounded-2xl border border-white/10 flex items-center justify-center text-metallic-400 group-hover:text-white transition-colors">
-            <Shield size={28} />
-          </div>
-          <div>
-            <span className="text-[9px] font-black text-metallic-500 uppercase tracking-[0.4em] block mb-1">Archive Integrity Policy</span>
-            <p className="text-white font-black text-sm uppercase tracking-widest opacity-80 leading-relaxed">
-              Export protocols ensure parity between local synchronization and external archives. Maintain regular backups for system stability.
-            </p>
-          </div>
+      {/* Info note */}
+      <div className="mt-6 flex items-start gap-3 px-4 py-3.5 bg-bg rounded-xl border border-metallic-300">
+        <Info size={15} className="text-metallic-500 mt-0.5 shrink-0" />
+        <div>
+          <p className="text-sm font-semibold text-metallic-800">Best Practice</p>
+          <p className="text-xs text-metallic-500 mt-1 leading-relaxed">
+            Export your bracket periodically. Use JSON for data backups and PDF for sharing with participants.
+          </p>
         </div>
       </div>
     </div>

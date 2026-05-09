@@ -1,411 +1,439 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useTournamentStore } from './store/tournamentStore';
 import { TeamManagement } from './components/TeamManagement';
 import { FormatSelection } from './components/FormatSelection';
 import { BracketDisplay } from './components/BracketDisplay';
 import { ExportOptions } from './components/ExportOptions';
 import { Login } from './components/Login';
-import { Settings, Home, Save, Trash2, ExternalLink, LogOut, User as UserIcon } from 'lucide-react';
-
-type View = 'welcome' | 'setup' | 'bracket' | 'export';
+import { Settings, Home, Save, User as UserIcon, LogOut, Trash2, ExternalLink, Trophy, LayoutDashboard, Users, GitMerge, Calendar, FileText, Download, ShieldAlert, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
+import type { BracketFormat, Tournament } from './types';
 
 function App() {
-  const [view, setView] = useState<View>('welcome');
+  const [view, setView] = useState<'welcome' | 'overview' | 'teams' | 'bracket' | 'schedule' | 'results' | 'export' | 'audit'>('welcome');
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [tournamentName, setTournamentName] = useState('');
   const [organizerName, setOrganizerName] = useState('');
   const [description, setDescription] = useState('');
+  const [gameType, setGameType] = useState('');
+  const [eventDate, setEventDate] = useState('');
+  const [venue, setVenue] = useState('');
+  const [capacity, setCapacity] = useState('16');
   const [editMode, setEditMode] = useState(false);
 
-  const user = useTournamentStore((state) => state.user);
-  const logout = useTournamentStore((state) => state.logout);
-  const tournament = useTournamentStore((state) => state.tournament);
-  const createTournament = useTournamentStore((state) => state.createTournament);
-  const addTeam = useTournamentStore((state) => state.addTeam);
-  const removeTeam = useTournamentStore((state) => state.removeTeam);
-  const updateTeam = useTournamentStore((state) => state.updateTeam);
-  const generateBracket = useTournamentStore((state) => state.generateBracket);
-  const updateMatchResult = useTournamentStore((state) => state.updateMatchResult);
-  const saveTournament = useTournamentStore((state) => state.saveTournament);
-  const resetTournament = useTournamentStore((state) => state.resetTournament);
-
-  useEffect(() => {
-    // Load tournaments from localStorage
-    const saved = localStorage.getItem('tournaments');
-    if (saved) {
-      try {
-        // JSON.parse(saved); // Could be used to populate tournaments list
-      } catch (e) {
-        console.error('Failed to load tournaments:', e);
-      }
-    }
-  }, []);
-
-  const tournaments = useTournamentStore((state) => state.tournaments);
-  const loadTournament = useTournamentStore((state) => state.loadTournament);
-  const deleteTournament = useTournamentStore((state) => state.deleteTournament);
+  const {
+    tournament, tournaments, user, logout,
+    createTournament, generateBracket,
+    addTeam, removeTeam, updateTeam,
+    updateMatchResult, saveTournament, resetTournament,
+    loadTournament: loadExistingTournament, deleteTournament,
+  } = useTournamentStore();
 
   const handleCreateTournament = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!tournamentName.trim() || !organizerName.trim()) {
-      alert('Please fill in tournament name and organizer');
-      return;
-    }
-    createTournament(tournamentName, organizerName, description);
-    setView('setup');
-  };
-
-  const handleLoadTournament = (t: any) => {
-    loadTournament(t);
-    if (t.bracket.rounds.length > 0) {
-      setView('bracket');
-    } else {
-      setView('setup');
+    if (tournamentName.trim() && organizerName.trim()) {
+      createTournament({
+        name: tournamentName,
+        organizer: organizerName,
+        description,
+        gameType: gameType || 'General',
+        eventDate: eventDate || new Date().toISOString().split('T')[0],
+        venue: venue || 'TBD',
+        capacity: parseInt(capacity, 10) || 16
+      });
+      setView('overview');
     }
   };
 
-  const handleDeleteTournament = (e: React.MouseEvent, id: string) => {
-    e.stopPropagation();
-    if (window.confirm('Are you sure you want to delete this tournament?')) {
-      deleteTournament(id);
-    }
-  };
-
-  const handleGenerateBracket = (format: any, bracketName: string) => {
-    generateBracket(format, bracketName);
+  const handleGenerateBracket = (format: BracketFormat, name: string) => {
+    generateBracket(format, name);
     setView('bracket');
   };
 
   const handleSave = () => {
     saveTournament();
-    alert('Tournament saved successfully!');
+    alert('Tournament saved!');
   };
 
   const handleReset = () => {
-    if (window.confirm('Are you sure you want to start over? Unsaved changes will be lost.')) {
+    if (window.confirm('Return to welcome screen? Unsaved changes will be lost.')) {
+      resetTournament();
+      setView('welcome');
       setTournamentName('');
       setOrganizerName('');
       setDescription('');
-      resetTournament();
-      setView('welcome');
-      setEditMode(false);
+      setGameType('');
+      setEventDate('');
+      setVenue('');
+      setCapacity('16');
     }
   };
 
-  if (!user) {
-    return <Login />;
-  }
+  const handleLoadTournament = (t: Tournament) => {
+    loadExistingTournament(t);
+    setView('bracket');
+  };
 
+  const handleDeleteTournament = (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (window.confirm('Delete this tournament? This cannot be undone.')) deleteTournament(id);
+  };
+
+  /* ── Auth gate ─────────────────────────────────────────── */
+  if (!user) return <Login />;
+
+  /* ── Welcome screen ────────────────────────────────────── */
   if (!tournament && view === 'welcome') {
     return (
-      <div className="min-h-screen bg-metallic-950 flex flex-col md:flex-row items-center justify-center p-4 gap-8 brushed-metal">
-        {/* Creation Form */}
-        <div className="w-full max-w-md">
-          <div className="metallic-card rounded-3xl p-8 overflow-hidden relative border border-white/10">
-            <div className="absolute top-0 right-0 w-32 h-32 bg-white/5 rounded-full -mr-16 -mt-16 opacity-20"></div>
-            
-            <button 
-              onClick={() => logout()}
-              className="absolute top-4 right-4 p-2 text-metallic-500 hover:text-white transition-colors z-10"
-              title="Logout"
-            >
-              <LogOut size={20} />
-            </button>
+      <div className="min-h-screen bg-bg flex flex-col items-center justify-center p-6 gap-8">
 
-            <div className="relative text-center mb-8">
-              <div className="inline-block bg-gradient-to-tr from-metallic-700 to-metallic-500 text-white p-4 rounded-2xl shadow-xl mb-4 border border-white/20 shine-effect">
-                <Settings size={32} />
+        {/* Page header */}
+        <div className="w-full max-w-4xl flex items-end justify-between">
+          <div>
+            <h1 className="heading text-3xl flex items-center gap-2.5">
+              <Trophy size={28} className="text-metallic-600" />
+              Nexus<span className="text-metallic-500 font-medium">System</span>
+            </h1>
+            <p className="text-sm text-metallic-500 font-medium mt-1">Championship Management Interface</p>
+          </div>
+          <button
+            onClick={() => logout()}
+            className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold text-metallic-600 hover:text-metallic-900 bg-surface border border-metallic-300 rounded-lg hover:bg-bg transition-all"
+          >
+            <LogOut size={14} /> Logout
+          </button>
+        </div>
+
+        {/* Two-column layout */}
+        <div className="flex flex-col md:flex-row w-full max-w-4xl gap-6">
+
+          {/* New tournament form */}
+          <div className="flex-1 card">
+            <h2 className="heading text-lg flex items-center gap-2 mb-6">
+              <Settings size={18} className="text-metallic-500" /> New Tournament
+            </h2>
+            <form onSubmit={handleCreateTournament} className="space-y-4">
+              <div className="space-y-1.5">
+                <label className="label-xs">Tournament Name</label>
+                <input type="text" value={tournamentName} onChange={(e) => setTournamentName(e.target.value)} placeholder="e.g., Summer Cup 2026" className="input-base" autoFocus required />
               </div>
-              <h1 className="text-4xl font-black text-white tracking-tighter uppercase italic">Nexus<span className="text-metallic-400">System</span></h1>
-              <p className="text-metallic-500 font-bold mt-1 uppercase text-[10px] tracking-[0.2em]">Championship Controller</p>
-            </div>
-
-            <form onSubmit={handleCreateTournament} className="space-y-4 relative">
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Tournament Designation</label>
-                <input
-                  type="text"
-                  value={tournamentName}
-                  onChange={(e) => setTournamentName(e.target.value)}
-                  placeholder="e.g., IRON GAUNTLET 2026"
-                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
-                  autoFocus
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-1.5">
+                  <label className="label-xs">Game / Sport Type</label>
+                  <input type="text" value={gameType} onChange={(e) => setGameType(e.target.value)} placeholder="e.g. Valorant" className="input-base" required />
+                </div>
+                <div className="space-y-1.5">
+                  <label className="label-xs">Organizer</label>
+                  <input type="text" value={organizerName} onChange={(e) => setOrganizerName(e.target.value)} placeholder="Your Name" className="input-base" required />
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Lead Organizer</label>
-                <input
-                  type="text"
-                  value={organizerName}
-                  onChange={(e) => setOrganizerName(e.target.value)}
-                  placeholder="COMMANDER NAME"
-                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
-                />
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-1.5 col-span-1">
+                  <label className="label-xs">Capacity</label>
+                  <input type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="16" className="input-base" required />
+                </div>
+                <div className="space-y-1.5 col-span-2">
+                  <label className="label-xs">Venue / Platform</label>
+                  <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Online / LAN Location" className="input-base" required />
+                </div>
               </div>
-
-              <div className="space-y-2">
-                <label className="block text-[10px] font-black text-metallic-400 uppercase tracking-widest ml-1">Briefing</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  placeholder="ADD MISSION DETAILS..."
-                  className="w-full px-4 py-4 bg-metallic-900/50 border border-white/10 rounded-xl focus:outline-none focus:border-metallic-400 transition-all text-white font-bold placeholder-metallic-700 shadow-inner"
-                  rows={3}
-                />
+              <div className="space-y-1.5">
+                <label className="label-xs">Description <span className="font-normal normal-case tracking-normal text-metallic-400">(optional)</span></label>
+                <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Additional details…" className="input-base resize-none" rows={2} />
               </div>
-
-              <button
-                type="submit"
-                className="w-full bg-gradient-to-r from-metallic-100 to-white text-metallic-950 font-black py-4 rounded-xl shadow-2xl hover:shadow-white/10 hover:-translate-y-0.5 active:translate-y-0 transition-all text-sm uppercase tracking-[0.2em]"
-              >
-                Initialize Operation
+              <button type="submit" className="w-full metallic-accent font-semibold py-2.5 rounded-xl text-sm hover:opacity-90 active:scale-[.99] transition-all mt-2">
+                Create Tournament
               </button>
             </form>
           </div>
-        </div>
 
-        {/* Recent Tournaments */}
-        {tournaments.length > 0 && (
-          <div className="w-full max-w-md">
-            <div className="bg-white/5 backdrop-blur-xl rounded-3xl p-8 border border-white/10 shadow-2xl">
-              <h2 className="text-xl font-black text-white mb-6 flex items-center gap-3 italic uppercase tracking-tighter">
-                <div className="w-1 h-6 bg-metallic-400 rounded-full"></div>
-                Archives
-              </h2>
-              
-              <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+          {/* Recent tournaments */}
+          <div className="flex-1 card flex flex-col">
+            <h2 className="heading text-lg flex items-center gap-2 mb-6">
+              <Save size={18} className="text-metallic-500" /> Recent Tournaments
+            </h2>
+
+            {tournaments.length > 0 ? (
+              <div className="space-y-2.5 overflow-y-auto custom-scrollbar flex-1 pr-1">
                 {tournaments.slice().reverse().map((t) => (
-                  <div 
+                  <div
                     key={t.id}
                     onClick={() => handleLoadTournament(t)}
-                    className="group bg-metallic-800/50 rounded-xl p-4 cursor-pointer hover:bg-metallic-700/50 transition-all hover:translate-x-1 border border-white/5 flex justify-between items-center shadow-lg"
+                    className="group flex items-center justify-between gap-3 px-4 py-3 bg-bg rounded-xl border border-metallic-300 hover:border-metallic-500 cursor-pointer transition-all"
                   >
-                    <div>
-                      <h3 className="font-bold text-metallic-200 group-hover:text-white transition-colors uppercase text-sm tracking-tight">{t.name}</h3>
-                      <div className="flex items-center gap-3 mt-1">
-                        <span className="text-[10px] font-black text-metallic-500 bg-metallic-900/50 px-2 py-0.5 rounded border border-white/5 uppercase tracking-tighter">
-                          {t.bracket.format.replace('-', ' ')}
-                        </span>
-                        <span className="text-[10px] font-bold text-metallic-600">
+                    <div className="min-w-0">
+                      <p className="font-semibold text-sm text-metallic-900 truncate group-hover:text-metallic-700 transition-colors">
+                        {t.name}
+                      </p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="badge">{t.bracket.format.replace('-', ' ')}</span>
+                        <span className="text-xs text-metallic-400">
                           {new Date(t.updatedAt).toLocaleDateString()}
                         </span>
                       </div>
                     </div>
-                    
-                    <div className="flex items-center gap-2">
-                      <button 
+                    <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-all shrink-0">
+                      <button
                         onClick={(e) => handleDeleteTournament(e, t.id)}
-                        className="p-2 text-metallic-600 hover:text-red-400 transition-all opacity-0 group-hover:opacity-100"
-                        title="Purge"
+                        className="p-1.5 text-metallic-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                        title="Delete"
                       >
-                        <Trash2 size={16} />
+                        <Trash2 size={14} />
                       </button>
-                      <div className="text-metallic-400 opacity-0 group-hover:opacity-100 transition-all">
-                        <ExternalLink size={16} />
-                      </div>
+                      <span className="p-1.5 text-metallic-400">
+                        <ExternalLink size={14} />
+                      </span>
                     </div>
                   </div>
                 ))}
               </div>
-              
-              <p className="text-metallic-600 text-[9px] mt-6 text-center font-black uppercase tracking-[0.3em] opacity-50">
-                LOCAL STORAGE SECURED
-              </p>
-            </div>
+            ) : (
+              <div className="flex-1 flex flex-col items-center justify-center text-center py-10">
+                <Save size={32} className="text-metallic-300 mb-3" />
+                <p className="text-sm font-semibold text-metallic-600">No saved tournaments</p>
+                <p className="text-xs text-metallic-400 mt-1">Create one to get started.</p>
+              </div>
+            )}
           </div>
-        )}
+        </div>
       </div>
     );
   }
 
-  if (!tournament) {
-    return null;
-  }
+  if (!tournament) return null;
+
+  /* ── Progress helper ───────────────────────────────────── */
+  const totalMatches     = tournament.bracket.rounds.reduce((a, r) => a + r.matches.filter(m => m.team1 && m.team2).length, 0);
+  const completedMatches = tournament.bracket.rounds.reduce((a, r) => a + r.matches.filter(m => m.winner).length, 0);
+  const progressPct      = totalMatches > 0 ? Math.round((completedMatches / totalMatches) * 100) : 0;
+
+  /* ── Main app shell (Sidebar Layout) ────────────────────── */
+  
+  const navItems = [
+    { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
+    { id: 'teams', icon: Users, label: 'Teams', count: tournament.bracket.teams.length },
+    { id: 'bracket', icon: GitMerge, label: 'Bracket' },
+    { id: 'schedule', icon: Calendar, label: 'Schedule' },
+    { id: 'results', icon: Activity, label: 'Results' },
+    { id: 'export', icon: Download, label: 'Export' },
+    { id: 'audit', icon: FileText, label: 'Audit Log' }
+  ] as const;
 
   return (
-    <div className="min-h-screen bg-metallic-950 text-metallic-200 brushed-metal">
-      {/* Header */}
-      <header className="bg-metallic-900 border-b border-white/10 sticky top-0 z-50 overflow-hidden backdrop-blur-xl">
-        <div className="absolute top-0 left-0 w-full h-[2px] bg-white/5">
-          <div 
-            className="h-full bg-metallic-400 shadow-[0_0_15px_rgba(255,255,255,0.5)] transition-all duration-1000"
-            style={{ 
-              width: `${(() => {
-                const totalMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.team1 && m.team2).length, 0);
-                const completedMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.winner).length, 0);
-                return totalMatches > 0 ? (completedMatches / totalMatches) * 100 : 0;
-              })()}%` 
-            }}
-          ></div>
+    <div className="flex h-screen bg-bg overflow-hidden text-primary">
+      
+      {/* Sidebar */}
+      <aside className={`bg-sidebar border-r border-border flex flex-col transition-all duration-300 ${sidebarOpen ? 'w-64' : 'w-20'} shrink-0 z-20`}>
+        {/* Sidebar Header (Tournament Switcher stub) */}
+        <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+          {sidebarOpen ? (
+            <div className="flex items-center gap-2 overflow-hidden">
+              <div className="w-8 h-8 rounded bg-surface border border-border flex items-center justify-center shrink-0">
+                <Trophy size={16} className="text-secondary" />
+              </div>
+              <div className="min-w-0">
+                <p className="text-sm font-bold truncate text-primary leading-tight">{tournament.name}</p>
+                <p className="text-[10px] text-secondary font-mono tracking-widest uppercase">Admin</p>
+              </div>
+            </div>
+          ) : (
+            <div className="w-full flex justify-center">
+              <Trophy size={20} className="text-secondary" />
+            </div>
+          )}
         </div>
 
-        <div className="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-6">
+        {/* Navigation */}
+        <nav className="flex-1 overflow-y-auto py-4 px-3 space-y-1 custom-scrollbar">
+          {navItems.map((item) => {
+            const active = view === item.id;
+            return (
               <button
-                onClick={handleReset}
-                className="p-2.5 bg-metallic-800 text-metallic-300 hover:text-white hover:bg-metallic-700 rounded-xl transition-all border border-white/5"
-                title="Return to Core"
+                key={item.id}
+                onClick={() => setView(item.id)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
+                  active ? 'bg-surface border border-border text-primary shadow-sm' : 'text-secondary hover:text-primary hover:bg-surface/50 border border-transparent'
+                } ${sidebarOpen ? 'justify-between' : 'justify-center'}`}
+                title={!sidebarOpen ? item.label : undefined}
               >
-                <Home size={20} />
+                <div className="flex items-center gap-3">
+                  <item.icon size={18} className={active ? 'text-primary' : 'text-secondary'} />
+                  {sidebarOpen && <span className="text-sm font-medium">{item.label}</span>}
+                </div>
+                {sidebarOpen && item.count !== undefined && (
+                  <span className="badge badge-dark bg-surface border-border text-[10px] px-1.5 py-0.5">{item.count}</span>
+                )}
               </button>
-              <div>
-                <h1 className="text-xl font-black text-white uppercase tracking-tighter italic">{tournament.name}</h1>
-                <div className="flex items-center gap-2 mt-1">
-                  <span className="text-[10px] text-metallic-500 font-black uppercase tracking-[0.2em] opacity-80">Sector: {tournament.organizer}</span>
-                  <div className="w-1 h-1 bg-metallic-700 rounded-full"></div>
-                  <span className="text-[10px] text-metallic-500 font-black uppercase tracking-[0.2em] opacity-80">{tournament.bracket.format.replace('-', ' ')}</span>
+            )
+          })}
+        </nav>
+
+        {/* Sidebar Footer */}
+        <div className="p-4 border-t border-border">
+          <div className={`flex items-center gap-3 ${sidebarOpen ? '' : 'justify-center'}`}>
+            <div className="w-8 h-8 bg-surface rounded-full flex items-center justify-center border border-border shrink-0">
+              <UserIcon size={14} className="text-secondary" />
+            </div>
+            {sidebarOpen && (
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-bold truncate text-primary">{user.username}</p>
+                <button onClick={() => logout()} className="text-[10px] text-secondary hover:text-red-500 font-mono tracking-wide uppercase transition-colors">Logout</button>
+              </div>
+            )}
+          </div>
+          <div className="mt-4 flex items-center justify-between">
+            <button onClick={() => setSidebarOpen(!sidebarOpen)} className="p-1.5 text-secondary hover:text-primary hover:bg-surface rounded-lg transition-colors mx-auto">
+              {sidebarOpen ? <ChevronLeft size={16} /> : <ChevronRight size={16} />}
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      {/* Main Content Area */}
+      <div className="flex-1 flex flex-col min-w-0 overflow-hidden relative">
+        
+        {/* Stats Strip */}
+        <header className="h-16 bg-bg border-b border-border flex items-center justify-between px-6 shrink-0">
+          <div className="flex items-center gap-4">
+            <h2 className="text-lg font-bold text-primary heading capitalize">{view.replace('-', ' ')}</h2>
+            <div className="h-4 w-px bg-border hidden sm:block" />
+            <span className="badge hidden sm:inline-flex">{tournament.bracket.format.replace('-', ' ')}</span>
+          </div>
+
+          <div className="flex items-center gap-6">
+            <div className="flex items-center gap-4 text-right">
+              <div className="hidden md:block">
+                <p className="label-xs">Progress</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <div className="w-24 h-1.5 bg-surface rounded-full overflow-hidden border border-border">
+                    <div className="h-full bg-accent" style={{ width: `${progressPct}%` }} />
+                  </div>
+                  <span className="text-xs font-mono text-primary">{progressPct}%</span>
                 </div>
               </div>
             </div>
-
-            <div className="flex items-center gap-6">
-              {/* User Profile */}
-              <div className="hidden lg:flex items-center gap-4 pr-6 border-r border-white/10">
-                <div className="w-10 h-10 bg-metallic-800 rounded-xl flex items-center justify-center border border-white/10 text-metallic-400">
-                  <UserIcon size={20} />
-                </div>
-                <div className="flex flex-col">
-                  <span className="text-[10px] font-black uppercase tracking-widest text-white leading-none mb-1">{user.username}</span>
-                  <span className="text-[9px] text-metallic-500 font-bold uppercase tracking-tighter leading-none opacity-70">{user.role}</span>
-                </div>
-                <button 
-                  onClick={() => logout()}
-                  className="ml-2 p-2 text-metallic-600 hover:text-red-400 transition-colors"
-                  title="Shutdown Session"
-                >
-                  <LogOut size={16} />
-                </button>
-              </div>
-
-              <div className="hidden md:flex items-center gap-6 text-[10px] font-black tracking-widest uppercase">
-                <div className="flex flex-col items-end">
-                  <span className="text-metallic-600">Active Teams</span>
-                  <span className="text-white text-lg leading-tight">{tournament.bracket.teams.length}</span>
-                </div>
-                <div className="flex flex-col items-end">
-                  <span className="text-metallic-600">Completion</span>
-                  <span className="text-white text-lg leading-tight">
-                    {(() => {
-                      const totalMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.team1 && m.team2).length, 0);
-                      const completedMatches = tournament.bracket.rounds.reduce((acc, r) => acc + r.matches.filter(m => m.winner).length, 0);
-                      return Math.round(totalMatches > 0 ? (completedMatches / totalMatches) * 100 : 0);
-                    })()}%
-                  </span>
-                </div>
-              </div>
-
-              <button
-                onClick={handleSave}
-                className="flex items-center gap-2 bg-white text-metallic-950 px-6 py-2.5 rounded-xl font-black text-xs uppercase tracking-widest hover:bg-metallic-200 transition-all shadow-[0_0_20px_rgba(255,255,255,0.1)]"
-              >
-                <Save size={16} /> Save Data
+            
+            <div className="flex items-center gap-2">
+              <button onClick={handleReset} className="p-2 text-secondary hover:text-primary hover:bg-surface rounded-lg transition-all" title="Return to Welcome">
+                <Home size={16} />
+              </button>
+              <button onClick={handleSave} className="metallic-accent flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg hover:opacity-90 transition-all shadow-sm">
+                <Save size={14} /> Save
               </button>
             </div>
           </div>
-        </div>
-      </header>
+        </header>
 
-      {/* Main Content */}
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Navigation Tabs */}
-        <div className="flex flex-wrap gap-3 mb-10">
-          <button
-            onClick={() => setView('setup')}
-            className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
-              view === 'setup'
-                ? 'bg-white text-metallic-950 border-white shadow-xl'
-                : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
-            }`}
-          >
-            Config
-          </button>
+        {/* View content container */}
+        <main className="flex-1 overflow-y-auto custom-scrollbar p-6 bg-bg">
+          <div className="fade-up max-w-7xl mx-auto space-y-6">
+            
+            {view === 'overview' && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                   <div className="card">
+                      <p className="label-xs mb-1">Total Teams</p>
+                      <p className="text-3xl font-mono text-primary">{tournament.bracket.teams.length} <span className="text-base text-secondary">/ {tournament.capacity}</span></p>
+                   </div>
+                   <div className="card">
+                      <p className="label-xs mb-1">Format</p>
+                      <p className="text-lg font-bold text-primary capitalize mt-2">{tournament.bracket.format.replace('-', ' ')}</p>
+                   </div>
+                   <div className="card">
+                      <p className="label-xs mb-1">Matches</p>
+                      <p className="text-3xl font-mono text-primary">{completedMatches} <span className="text-base text-secondary">/ {totalMatches}</span></p>
+                   </div>
+                   <div className="card">
+                      <p className="label-xs mb-1">Status</p>
+                      <span className="badge badge-dark mt-2">{tournament.status}</span>
+                   </div>
+                </div>
 
-          {tournament.bracket.rounds.length > 0 && (
-            <>
-              <button
-                onClick={() => {
-                  setView('bracket');
-                  setEditMode(false);
-                }}
-                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
-                  view === 'bracket' && !editMode
-                    ? 'bg-white text-metallic-950 border-white shadow-xl'
-                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
-                }`}
-              >
-                Tactical View
-              </button>
+                <div className="card bg-surface/50 border border-border/50">
+                  <h3 className="text-sm font-bold text-primary mb-4">Event Details</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
+                    <div>
+                      <p className="label-xs mb-1 text-secondary">Game / Sport</p>
+                      <p className="text-sm font-medium">{tournament.gameType}</p>
+                    </div>
+                    <div>
+                      <p className="label-xs mb-1 text-secondary">Date</p>
+                      <p className="text-sm font-medium">{tournament.eventDate}</p>
+                    </div>
+                    <div>
+                      <p className="label-xs mb-1 text-secondary">Venue</p>
+                      <p className="text-sm font-medium">{tournament.venue}</p>
+                    </div>
+                    <div>
+                      <p className="label-xs mb-1 text-secondary">Organizer</p>
+                      <p className="text-sm font-medium">{tournament.organizer}</p>
+                    </div>
+                  </div>
+                </div>
 
-              <button
-                onClick={() => {
-                  setView('bracket');
-                  setEditMode(true);
-                }}
-                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
-                  view === 'bracket' && editMode
-                    ? 'bg-metallic-100 text-metallic-950 border-white shadow-xl'
-                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
-                }`}
-              >
-                Entry Mode
-              </button>
+                <div className="mt-6">
+                  <FormatSelection teams={tournament.bracket.teams} onFormatSelected={handleGenerateBracket} disabled={tournament.bracket.teams.length < 2} />
+                </div>
+              </div>
+            )}
 
-              <button
-                onClick={() => setView('export')}
-                className={`px-8 py-4 rounded-xl font-black text-xs uppercase tracking-[0.2em] transition-all border-2 ${
-                  view === 'export'
-                    ? 'bg-white text-metallic-950 border-white shadow-xl'
-                    : 'bg-metallic-900/50 text-metallic-500 border-white/5 hover:border-white/20 hover:text-metallic-200'
-                }`}
-              >
-                Data Export
-              </button>
-            </>
-          )}
-        </div>
+            {view === 'teams' && (
+              <TeamManagement teams={tournament.bracket.teams} onAddTeam={addTeam} onRemoveTeam={removeTeam} onUpdateTeam={updateTeam} />
+            )}
 
-        {/* View Content */}
-        <div className="animate-in fade-in slide-in-from-bottom-4 duration-500">
-          {view === 'setup' && (
-            <div className="space-y-8">
-              <TeamManagement
-                teams={tournament.bracket.teams}
-                onAddTeam={addTeam}
-                onRemoveTeam={removeTeam}
-                onUpdateTeam={updateTeam}
-              />
+            {view === 'bracket' && tournament.bracket.rounds.length > 0 && (
+              <BracketDisplay bracket={tournament.bracket} onMatchUpdate={updateMatchResult} editMode={editMode} />
+            )}
 
-              <FormatSelection
-                teams={tournament.bracket.teams}
-                onFormatSelected={handleGenerateBracket}
-                disabled={tournament.bracket.teams.length < 2}
-              />
-            </div>
-          )}
+            {view === 'export' && tournament.bracket.rounds.length > 0 && (
+              <ExportOptions bracket={tournament.bracket} />
+            )}
 
-          {view === 'bracket' && tournament.bracket.rounds.length > 0 && (
-            <BracketDisplay
-              bracket={tournament.bracket}
-              onMatchUpdate={updateMatchResult}
-              editMode={editMode}
-            />
-          )}
+            {(view === 'bracket' || view === 'export' || view === 'schedule' || view === 'results') && tournament.bracket.rounds.length === 0 && (
+              <div className="card p-16 text-center">
+                <ShieldAlert size={40} className="mx-auto mb-4 text-secondary opacity-50" />
+                <p className="text-base font-bold text-primary">No Bracket Generated</p>
+                <p className="text-sm text-secondary mt-2">Go to Overview to generate a bracket format first.</p>
+              </div>
+            )}
 
-          {view === 'export' && tournament.bracket.rounds.length > 0 && (
-            <ExportOptions bracket={tournament.bracket} />
-          )}
+            {(view === 'schedule' || view === 'results') && (
+              <div className="card p-16 text-center">
+                <Settings size={40} className="mx-auto mb-4 text-secondary opacity-50 animate-spin-slow" style={{ animationDuration: '4s' }} />
+                <p className="text-base font-bold text-primary">Panel Under Construction</p>
+                <p className="text-sm text-secondary mt-2">The {view} module is currently being implemented for the Admin engine.</p>
+              </div>
+            )}
 
-          {/* Empty State */}
-          {view === 'bracket' && tournament.bracket.rounds.length === 0 && (
-            <div className="metallic-card rounded-3xl p-20 text-center border-2 border-dashed border-white/10">
-              <Trophy size={64} className="mx-auto mb-6 text-metallic-700" />
-              <p className="text-metallic-400 text-lg font-black uppercase tracking-widest">Bracket Engine Offline</p>
-              <p className="text-metallic-600 mt-2">Initialize configuration to generate tournament matrix</p>
-            </div>
-          )}
-        </div>
-      </main>
+            {view === 'audit' && (
+              <div className="card p-6">
+                <h3 className="heading text-lg mb-6">System Audit Log</h3>
+                <div className="space-y-4">
+                  {tournament.auditLog?.length > 0 ? (
+                    tournament.auditLog.map((log) => (
+                      <div key={log.id} className="flex gap-4 p-4 rounded-xl border border-border bg-base items-start">
+                        <div className="shrink-0 mt-0.5">
+                          <FileText size={16} className="text-secondary" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="flex items-center justify-between gap-4 mb-1">
+                            <span className="badge badge-dark text-[10px] py-0">{log.type}</span>
+                            <span className="text-[11px] font-mono text-secondary">{new Date(log.timestamp).toLocaleString()}</span>
+                          </div>
+                          <p className="text-sm text-primary">{log.description}</p>
+                          {log.matchId && <p className="text-xs font-mono text-secondary mt-2">Match: {log.matchId}</p>}
+                        </div>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-secondary text-center py-10">No actions recorded yet.</p>
+                  )}
+                </div>
+              </div>
+            )}
+
+          </div>
+        </main>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tournament, Team, BracketFormat, User } from '../types';
+import type { Tournament, Team, BracketFormat, User, AuditAction } from '../types';
 import { generateBracket, updateMatchResult } from '../utils/bracketGenerator';
 
 interface TournamentStore {
@@ -10,7 +10,7 @@ interface TournamentStore {
   // Actions
   login: (username: string, password: string) => void;
   logout: () => void;
-  createTournament: (name: string, organizer: string, description: string) => void;
+  createTournament: (params: { name: string; organizer: string; description: string; gameType: string; eventDate: string; venue: string; capacity: number }) => void;
   generateBracket: (format: BracketFormat, bracketName: string) => void;
   addTeam: (team: Team) => void;
   removeTeam: (teamId: string) => void;
@@ -29,7 +29,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
 
   login: (username, password) => {
     if (username === 'admin' && password === 'admin123') {
-      const user = { username, role: 'admin' };
+      const user: User = { username, role: 'admin' };
       set({ user });
       localStorage.setItem('user', JSON.stringify(user));
     } else {
@@ -42,13 +42,26 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     localStorage.removeItem('user');
   },
 
-  createTournament: (name, organizer, description) => {
+  createTournament: (params) => {
     const now = Date.now();
+    const code = params.name.substring(0, 3).toUpperCase() + Math.floor(Math.random() * 100);
     const tournament: Tournament = {
       id: `tournament-${now}`,
-      name,
-      organizer,
-      description,
+      code,
+      name: params.name,
+      organizer: params.organizer,
+      description: params.description,
+      gameType: params.gameType,
+      eventDate: params.eventDate,
+      venue: params.venue,
+      capacity: params.capacity,
+      status: 'Draft',
+      auditLog: [{
+        id: `audit-${now}`,
+        timestamp: now,
+        type: 'CREATE',
+        description: `Tournament "${params.name}" created.`
+      }],
       bracket: {
         id: `bracket-${now}`,
         name: 'Bracket 1',
@@ -70,13 +83,23 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     const { tournament } = get();
     if (!tournament) return;
 
-    const newBracket = generateBracket(format, tournament.bracket.teams, bracketName);
+    if (tournament.bracket.rounds.length > 0) {
+      if (!window.confirm("This will overwrite the current bracket. Confirm?")) return;
+    }
+
+    const newBracket = generateBracket(format, tournament.bracket.teams, bracketName, tournament.code);
 
     set({
       tournament: {
         ...tournament,
         bracket: newBracket,
         updatedAt: Date.now(),
+        auditLog: [{
+          id: `audit-${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'GENERATE',
+          description: `Bracket generated with format: ${format}`
+        }, ...tournament.auditLog]
       },
     });
   },
@@ -84,6 +107,11 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
   addTeam: (team) => {
     const { tournament } = get();
     if (!tournament) return;
+
+    if (tournament.bracket.teams.length >= tournament.capacity) {
+      alert(`Cannot add team. Tournament is at full capacity (${tournament.capacity}).`);
+      return;
+    }
 
     const updatedTeams = [...tournament.bracket.teams, team];
 
@@ -95,6 +123,12 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
           teams: updatedTeams,
         },
         updatedAt: Date.now(),
+        auditLog: [{
+          id: `audit-${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'IMPORT',
+          description: `Team added manually: ${team.name}`
+        }, ...tournament.auditLog]
       },
     });
   },
@@ -103,6 +137,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     const { tournament } = get();
     if (!tournament) return;
 
+    const teamToRemove = tournament.bracket.teams.find((t) => t.id === teamId);
     const updatedTeams = tournament.bracket.teams.filter((t) => t.id !== teamId);
 
     set({
@@ -113,6 +148,12 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
           teams: updatedTeams,
         },
         updatedAt: Date.now(),
+        auditLog: [{
+          id: `audit-${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'EDIT',
+          description: `Team removed: ${teamToRemove?.name}`
+        }, ...tournament.auditLog]
       },
     });
   },
@@ -148,6 +189,13 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         ...tournament,
         bracket: updatedBracket,
         updatedAt: Date.now(),
+        auditLog: [{
+          id: `audit-${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'RESULT',
+          matchId,
+          description: `Result entered for match ${matchId}: ${score1} - ${score2}`
+        }, ...tournament.auditLog]
       },
     });
   },
