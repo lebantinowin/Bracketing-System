@@ -1,6 +1,7 @@
 import React from 'react';
 import type { Bracket } from '../types';
 import { MatchCard } from './MatchCard';
+import { GraphicalBracketTree } from './GraphicalBracketTree';
 import { Trophy, RefreshCw } from 'lucide-react';
 
 interface BracketDisplayProps {
@@ -50,7 +51,9 @@ export const BracketDisplay: React.FC<BracketDisplayProps> = ({ bracket, onMatch
       </div>
 
       {/* Content */}
-      {isSingleElim || isRoundRobin ? (
+      {isSingleElim ? (
+        <GraphicalBracketTree rounds={bracket.rounds} matchUpdater={matchUpdater} editMode={editMode} />
+      ) : isRoundRobin ? (
         <div className="space-y-10 overflow-x-auto pb-2 custom-scrollbar">
           {bracket.rounds.map((round) => (
             <div key={round.number} className="min-w-[280px]">
@@ -58,14 +61,10 @@ export const BracketDisplay: React.FC<BracketDisplayProps> = ({ bracket, onMatch
                 <span className="shrink-0 w-7 h-7 flex items-center justify-center rounded-lg bg-metallic-200 border border-metallic-300 text-xs font-bold text-metallic-800">
                   {round.number}
                 </span>
-                <span className="text-sm font-bold text-metallic-800 uppercase tracking-wide">Round {round.number}</span>
+                <span className="text-sm font-bold text-metallic-800 uppercase tracking-wide">{round.label || `Round ${round.number}`}</span>
                 <span className="divider" />
               </div>
-              <div className={`grid gap-3 ${
-                isRoundRobin
-                  ? 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-                  : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4'
-              }`}>
+              <div className="grid gap-3 grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                 {round.matches.map((match) => (
                   <MatchCard key={match.id} match={match} onUpdate={matchUpdater(match.id)} editMode={editMode} />
                 ))}
@@ -86,20 +85,14 @@ export const BracketDisplay: React.FC<BracketDisplayProps> = ({ bracket, onMatch
               <span className="divider" />
             </div>
             <div className="space-y-8">
-              {bracket.rounds
-                .filter((r) => r.matches.some((m) => m.id.includes('winners')))
-                .map((round) => (
-                  <div key={round.number}>
-                    <p className="label-xs mb-3">Round {round.number}</p>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                      {round.matches
-                        .filter((m) => m.id.includes('winners'))
-                        .map((match) => (
-                          <MatchCard key={match.id} match={match} onUpdate={matchUpdater(match.id)} editMode={editMode} compact />
-                        ))}
-                    </div>
-                  </div>
-                ))}
+              <GraphicalBracketTree 
+                rounds={bracket.rounds.filter(r => r.matches.some(m => m.id.includes('winners'))).map(r => ({
+                  ...r,
+                  matches: r.matches.filter(m => m.id.includes('winners'))
+                }))} 
+                matchUpdater={matchUpdater} 
+                editMode={editMode} 
+              />
             </div>
           </div>
 

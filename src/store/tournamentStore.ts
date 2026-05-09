@@ -13,6 +13,7 @@ interface TournamentStore {
   createTournament: (params: { name: string; organizer: string; description: string; gameType: string; eventDate: string; venue: string; capacity: number }) => void;
   generateBracket: (format: BracketFormat, bracketName: string) => void;
   addTeam: (team: Team) => void;
+  addTeams: (teams: Team[]) => void;
   removeTeam: (teamId: string) => void;
   updateTeam: (team: Team) => void;
   updateMatchResult: (matchId: string, score1: number, score2: number) => void;
@@ -35,7 +36,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
       const response = await fetch(`${API_URL}/tournaments`);
       if (response.ok) {
         const data = await response.json();
-        const loadedTournaments = data.map((t: any) => t.data);
+        const loadedTournaments = data.map((t: { data: Tournament }) => t.data);
         set({ tournaments: loadedTournaments });
       }
     } catch (error) {
@@ -93,6 +94,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     };
 
     set({ tournament });
+    get().saveTournament();
   },
 
   generateBracket: (format, bracketName) => {
@@ -118,6 +120,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         }, ...tournament.auditLog]
       },
     });
+    get().saveTournament();
   },
 
   addTeam: (team) => {
@@ -147,6 +150,43 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         }, ...tournament.auditLog]
       },
     });
+    get().saveTournament();
+  },
+
+  addTeams: (newTeams) => {
+    const { tournament } = get();
+    if (!tournament) return;
+
+    const availableSlots = tournament.capacity - tournament.bracket.teams.length;
+    if (availableSlots <= 0) {
+      alert(`Cannot add teams. Tournament is at full capacity (${tournament.capacity}).`);
+      return;
+    }
+
+    const teamsToAdd = newTeams.slice(0, availableSlots);
+    const updatedTeams = [...tournament.bracket.teams, ...teamsToAdd];
+
+    set({
+      tournament: {
+        ...tournament,
+        bracket: {
+          ...tournament.bracket,
+          teams: updatedTeams,
+        },
+        updatedAt: Date.now(),
+        auditLog: [{
+          id: `audit-${Date.now()}`,
+          timestamp: Date.now(),
+          type: 'IMPORT',
+          description: `Bulk imported ${teamsToAdd.length} teams via CSV`
+        }, ...tournament.auditLog]
+      },
+    });
+    get().saveTournament();
+    
+    if (teamsToAdd.length < newTeams.length) {
+      alert(`Only ${teamsToAdd.length} teams were imported due to capacity limits.`);
+    }
   },
 
   removeTeam: (teamId) => {
@@ -172,6 +212,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         }, ...tournament.auditLog]
       },
     });
+    get().saveTournament();
   },
 
   updateTeam: (team) => {
@@ -192,6 +233,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         updatedAt: Date.now(),
       },
     });
+    get().saveTournament();
   },
 
   updateMatchResult: (matchId, score1, score2) => {
@@ -214,6 +256,7 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
         }, ...tournament.auditLog]
       },
     });
+    get().saveTournament();
   },
 
   saveTournament: async () => {

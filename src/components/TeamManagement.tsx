@@ -1,10 +1,12 @@
 import React, { useState, useRef } from 'react';
+import Papa from 'papaparse';
 import type { Team } from '../types';
-import { X, Plus, Edit2, Users, Upload, Image as ImageIcon } from 'lucide-react';
+import { X, Plus, Edit2, Users, Upload, Image as ImageIcon, FileSpreadsheet } from 'lucide-react';
 
 interface TeamManagementProps {
   teams: Team[];
   onAddTeam: (team: Team) => void;
+  onAddTeams: (teams: Team[]) => void;
   onRemoveTeam: (teamId: string) => void;
   onUpdateTeam: (team: Team) => void;
 }
@@ -12,6 +14,7 @@ interface TeamManagementProps {
 export const TeamManagement: React.FC<TeamManagementProps> = ({
   teams,
   onAddTeam,
+  onAddTeams,
   onRemoveTeam,
   onUpdateTeam,
 }) => {
@@ -19,6 +22,31 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
   const [editingId, setEditingId] = useState<string | null>(null);
   const [formData, setFormData] = useState({ name: '', seed: '', logo: '' });
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const csvInputRef = useRef<HTMLInputElement>(null);
+
+  const handleCSVUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    Papa.parse(file, {
+      header: true,
+      skipEmptyLines: true,
+      complete: (results) => {
+        const newTeams: Team[] = results.data.map((row: Record<string, string>) => ({
+          id: `team-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
+          name: row.name || row.Name || row.Team || 'Unnamed Team',
+          seed: row.seed || row.Seed ? parseInt(row.seed || row.Seed) : undefined,
+          captain: row.captain || row.Captain,
+          contact: row.contact || row.Contact
+        }));
+        onAddTeams(newTeams);
+        if (csvInputRef.current) csvInputRef.current.value = '';
+      },
+      error: (error: Error) => {
+        alert(`Error parsing CSV: ${error.message}`);
+      }
+    });
+  };
 
   const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -73,12 +101,22 @@ export const TeamManagement: React.FC<TeamManagementProps> = ({
           <p className="text-sm text-metallic-500 mt-1">Manage participants and seeding</p>
         </div>
         {!showForm && (
-          <button
-            onClick={() => setShowForm(true)}
-            className="metallic-accent flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-[.98] transition-all shrink-0"
-          >
-            <Plus size={15} /> Add Team
-          </button>
+          <div className="flex items-center gap-3">
+            <input type="file" accept=".csv" className="hidden" ref={csvInputRef} onChange={handleCSVUpload} />
+            <button
+              onClick={() => csvInputRef.current?.click()}
+              className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold text-secondary hover:text-primary bg-surface border border-border hover:border-metallic-500 transition-all shrink-0"
+              title="Import CSV with 'name', 'seed', 'captain', 'contact' headers"
+            >
+              <FileSpreadsheet size={15} /> Import CSV
+            </button>
+            <button
+              onClick={() => setShowForm(true)}
+              className="metallic-accent flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold hover:opacity-90 active:scale-[.98] transition-all shrink-0"
+            >
+              <Plus size={15} /> Add Team
+            </button>
+          </div>
         )}
       </div>
 
