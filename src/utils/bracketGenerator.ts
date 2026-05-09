@@ -15,7 +15,7 @@ export const generateSingleElimination = (teams: Team[], code: string): Round[] 
 
   // Pad with byes (undefined teams)
   while (paddedTeams.length < nextPowerOf2) {
-    paddedTeams.push(undefined as any);
+    paddedTeams.push(undefined as unknown as Team);
   }
 
   const rounds: Round[] = [];
@@ -53,7 +53,7 @@ export const generateSingleElimination = (teams: Team[], code: string): Round[] 
     });
 
     // Set up next round with byes for teams that don't need to play
-    currentRound = matches.map(() => undefined as any);
+    currentRound = matches.map(() => undefined as unknown as Team);
     roundNumber++;
   }
 

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useTournamentStore } from './store/tournamentStore';
 import { TeamManagement } from './components/TeamManagement';
 import { FormatSelection } from './components/FormatSelection';
@@ -18,7 +18,7 @@ function App() {
   const [eventDate, setEventDate] = useState('');
   const [venue, setVenue] = useState('');
   const [capacity, setCapacity] = useState('16');
-  const [editMode, setEditMode] = useState(false);
+  const [editMode] = useState(false);
 
   const {
     tournament, tournaments, user, logout,
@@ -26,7 +26,14 @@ function App() {
     addTeam, removeTeam, updateTeam,
     updateMatchResult, saveTournament, resetTournament,
     loadTournament: loadExistingTournament, deleteTournament,
+    fetchTournaments,
   } = useTournamentStore();
+
+  useEffect(() => {
+    if (user) {
+      fetchTournaments();
+    }
+  }, [user, fetchTournaments]);
 
   const handleCreateTournament = (e: React.FormEvent) => {
     e.preventDefault();

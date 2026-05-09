@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Tournament, Team, BracketFormat, User, AuditAction } from '../types';
+import type { Tournament, Team, BracketFormat, User } from '../types';
 import { generateBracket, updateMatchResult } from '../utils/bracketGenerator';
 
 interface TournamentStore {
@@ -16,16 +16,32 @@ interface TournamentStore {
   removeTeam: (teamId: string) => void;
   updateTeam: (team: Team) => void;
   updateMatchResult: (matchId: string, score1: number, score2: number) => void;
-  saveTournament: () => void;
+  saveTournament: () => Promise<void>;
   loadTournament: (tournament: Tournament) => void;
   resetTournament: () => void;
-  deleteTournament: (tournamentId: string) => void;
+  deleteTournament: (tournamentId: string) => Promise<void>;
+  fetchTournaments: () => Promise<void>;
 }
+
+const API_URL = 'http://localhost:3001/api';
 
 export const useTournamentStore = create<TournamentStore>((set, get) => ({
   tournament: null,
   tournaments: JSON.parse(localStorage.getItem('tournaments') || '[]'),
   user: JSON.parse(localStorage.getItem('user') || 'null'),
+
+  fetchTournaments: async () => {
+    try {
+      const response = await fetch(`${API_URL}/tournaments`);
+      if (response.ok) {
+        const data = await response.json();
+        const loadedTournaments = data.map((t: any) => t.data);
+        set({ tournaments: loadedTournaments });
+      }
+    } catch (error) {
+      console.error('Failed to fetch tournaments', error);
+    }
+  },
 
   login: (username, password) => {
     if (username === 'admin' && password === 'admin123') {
@@ -200,21 +216,41 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
     });
   },
 
-  saveTournament: () => {
+  saveTournament: async () => {
     const { tournament, tournaments } = get();
     if (!tournament) return;
 
-    const existingIndex = tournaments.findIndex((t) => t.id === tournament.id);
-    let newTournaments: Tournament[];
-
-    if (existingIndex >= 0) {
-      newTournaments = tournaments.map((t) => (t.id === tournament.id ? tournament : t));
-    } else {
-      newTournaments = [...tournaments, tournament];
+    try {
+      const response = await fetch(`${API_URL}/tournaments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(tournament)
+      });
+      
+      if (response.ok) {
+        const existingIndex = tournaments.findIndex((t) => t.id === tournament.id);
+        let newTournaments: Tournament[];
+        if (existingIndex >= 0) {
+          newTournaments = tournaments.map((t) => (t.id === tournament.id ? tournament : t));
+        } else {
+          newTournaments = [...tournaments, tournament];
+        }
+        set({ tournaments: newTournaments });
+      } else {
+        throw new Error('Failed to save to backend');
+      }
+    } catch (error) {
+      console.error('Backend save failed, falling back to localStorage', error);
+      const existingIndex = tournaments.findIndex((t) => t.id === tournament.id);
+      let newTournaments: Tournament[];
+      if (existingIndex >= 0) {
+        newTournaments = tournaments.map((t) => (t.id === tournament.id ? tournament : t));
+      } else {
+        newTournaments = [...tournaments, tournament];
+      }
+      set({ tournaments: newTournaments });
+      localStorage.setItem('tournaments', JSON.stringify(newTournaments));
     }
-
-    set({ tournaments: newTournaments });
-    localStorage.setItem('tournaments', JSON.stringify(newTournaments));
   },
 
   loadTournament: (tournament) => {
@@ -223,13 +259,19 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
 
   resetTournament: () => set({ tournament: null }),
 
-  deleteTournament: (tournamentId) => {
+  deleteTournament: async (tournamentId) => {
     const { tournaments, tournament } = get();
+    
+    try {
+      await fetch(`${API_URL}/tournaments/${tournamentId}`, { method: 'DELETE' });
+    } catch (error) {
+      console.error('Backend delete failed, falling back to localStorage', error);
+    }
+    
     const newTournaments = tournaments.filter((t) => t.id !== tournamentId);
     
     set({ 
       tournaments: newTournaments,
-      // If we're deleting the current tournament, reset it
       tournament: tournament?.id === tournamentId ? null : tournament
     });
     

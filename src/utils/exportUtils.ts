@@ -44,7 +44,7 @@ export const exportToCSV = (bracket: Bracket, filename: string = 'bracket.csv') 
       const team1 = match.team1?.name || 'TBD';
       const team2 = match.team2?.name || 'BYE';
       const winner = match.winner?.name || '';
-      csv += `${round.number},${match.matchNumber + 1},"${team1}",${match.score1 || ''},\"${team2}\",${ match.score2 || ''},"${winner}"\n`;
+      csv += `${round.number},${match.matchNumber + 1},"${team1}",${match.score1 || ''},"${team2}",${ match.score2 || ''},"${winner}"\n`;
     });
   });
 
@@ -111,11 +111,11 @@ export const exportToPDF = (bracket: Bracket, filename: string = 'bracket.pdf') 
       yPosition = 10;
     }
 
-    pdf.setFont(undefined as any, 'bold');
+    pdf.setFont('helvetica', 'bold');
     pdf.text(`Round ${round.number}`, 10, yPosition);
     yPosition += 4;
 
-    pdf.setFont(undefined as any, 'normal');
+    pdf.setFont('helvetica', 'normal');
     round.matches.forEach((match) => {
       if (yPosition > pageHeight - 15) {
         pdf.addPage();
@@ -145,7 +145,7 @@ export const exportToPDF = (bracket: Bracket, filename: string = 'bracket.pdf') 
  * Export bracket to HTML for printing
  */
 export const exportToHTML = (bracket: Bracket, filename: string = 'bracket.html') => {
-  let html = `<!DOCTYPE html>
+  const html = `<!DOCTYPE html>
 <html>
 <head>
   <meta charset="UTF-8">

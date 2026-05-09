@@ -54,7 +54,7 @@ export interface AuditAction {
   type: 'CREATE' | 'IMPORT' | 'EDIT' | 'GENERATE' | 'RESULT' | 'ROLLBACK' | 'EXPORT' | 'STATUS_CHANGE';
   description: string;
   matchId?: string;
-  details?: any;
+  details?: Record<string, unknown>;
 }
 
 export interface Tournament {
