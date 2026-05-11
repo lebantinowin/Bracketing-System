@@ -11,9 +11,6 @@ export const WelcomeDashboard: React.FC<Props> = ({ onNavigate }) => {
   const [tournamentName, setTournamentName] = useState('');
   const [organizerName, setOrganizerName] = useState('');
   const [description, setDescription] = useState('');
-  const [gameType, setGameType] = useState('');
-  const [venue, setVenue] = useState('');
-  const [capacity, setCapacity] = useState('16');
 
   const { tournaments, createTournament, loadTournament, deleteTournament, fetchTournaments } = useTournamentStore();
 
@@ -24,15 +21,7 @@ export const WelcomeDashboard: React.FC<Props> = ({ onNavigate }) => {
   const handleCreateTournament = (e: React.FormEvent) => {
     e.preventDefault();
     if (tournamentName.trim() && organizerName.trim()) {
-      createTournament({
-        name: tournamentName,
-        organizer: organizerName,
-        description,
-        gameType: gameType || 'General',
-        eventDate: new Date().toISOString().split('T')[0],
-        venue: venue || 'TBD',
-        capacity: parseInt(capacity, 10) || 16
-      });
+      createTournament(tournamentName, organizerName, description);
       onNavigate();
     }
   };
@@ -59,25 +48,9 @@ export const WelcomeDashboard: React.FC<Props> = ({ onNavigate }) => {
             <label className="label-xs">Tournament Name</label>
             <input type="text" value={tournamentName} onChange={(e) => setTournamentName(e.target.value)} placeholder="e.g., Summer Cup 2026" className="input-base" autoFocus required />
           </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1.5">
-              <label className="label-xs">Game / Sport Type</label>
-              <input type="text" value={gameType} onChange={(e) => setGameType(e.target.value)} placeholder="e.g. Valorant" className="input-base" required />
-            </div>
-            <div className="space-y-1.5">
-              <label className="label-xs">Organizer</label>
-              <input type="text" value={organizerName} onChange={(e) => setOrganizerName(e.target.value)} placeholder="Your Name" className="input-base" required />
-            </div>
-          </div>
-          <div className="grid grid-cols-3 gap-4">
-            <div className="space-y-1.5 col-span-1">
-              <label className="label-xs">Capacity</label>
-              <input type="number" value={capacity} onChange={(e) => setCapacity(e.target.value)} placeholder="16" className="input-base" required />
-            </div>
-            <div className="space-y-1.5 col-span-2">
-              <label className="label-xs">Venue / Platform</label>
-              <input type="text" value={venue} onChange={(e) => setVenue(e.target.value)} placeholder="Online / LAN Location" className="input-base" required />
-            </div>
+          <div className="space-y-1.5">
+            <label className="label-xs">Organizer</label>
+            <input type="text" value={organizerName} onChange={(e) => setOrganizerName(e.target.value)} placeholder="Your Name" className="input-base" required />
           </div>
           <div className="space-y-1.5">
             <label className="label-xs">Description <span className="font-normal normal-case tracking-normal text-metallic-400">(optional)</span></label>
