@@ -42,9 +42,9 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
     if (teams.length === 0) return 'Add teams to calculate';
     let rounds: { matches: unknown[] }[] = [];
     switch (selectedFormat) {
-      case 'single-elimination': rounds = generateSingleElimination(teams); break;
-      case 'double-elimination': rounds = generateDoubleElimination(teams); break;
-      case 'round-robin':        rounds = generateRoundRobin(teams); break;
+      case 'single-elimination': rounds = generateSingleElimination(teams, 'PREVIEW'); break;
+      case 'double-elimination': rounds = generateDoubleElimination(teams, 'PREVIEW'); break;
+      case 'round-robin':        rounds = generateRoundRobin(teams, 'PREVIEW'); break;
     }
     const totalMatches = rounds.reduce((s, r) => s + r.matches.length, 0);
     return `${rounds.length} rounds · ${totalMatches} matches`;
@@ -88,14 +88,14 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
               disabled={disabled}
               className={`p-5 rounded-xl border-2 text-left flex flex-col gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
                 active
-                  ? 'border-metallic-900 bg-metallic-200'
-                  : 'border-metallic-300 bg-surface hover:border-metallic-500 hover:bg-bg'
+                  ? 'border-white bg-accent/10 shadow-sm'
+                  : 'border-border bg-surface hover:border-secondary hover:bg-bg'
               }`}
             >
-              <span className={active ? 'text-metallic-900' : 'text-metallic-500'}>{f.icon}</span>
+              <span className={active ? 'text-white' : 'text-secondary'}>{f.icon}</span>
               <div>
-                <p className={`font-semibold text-sm ${active ? 'text-metallic-900' : 'text-metallic-800'}`}>{f.name}</p>
-                <p className="text-xs text-metallic-500 mt-0.5 leading-snug">{f.description}</p>
+                <p className={`font-semibold text-sm ${active ? 'text-white' : 'text-secondary'}`}>{f.name}</p>
+                <p className="text-xs text-secondary mt-0.5 leading-snug">{f.description}</p>
               </div>
             </button>
           );
@@ -103,9 +103,9 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
       </div>
 
       {/* Preview row */}
-      <div className="flex items-center justify-between px-4 py-3 bg-bg rounded-xl border border-metallic-300 mb-6">
+      <div className="flex items-center justify-between px-4 py-3 bg-bg rounded-xl border border-border mb-6">
         <span className="label-xs">Preview</span>
-        <span className="text-sm font-semibold text-metallic-900">{getPreview()}</span>
+        <span className="text-sm font-semibold text-primary">{getPreview()}</span>
       </div>
 
       {/* Generate */}

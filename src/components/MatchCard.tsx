@@ -9,7 +9,7 @@ interface MatchCardProps {
   compact?: boolean;
 }
 
-export const MatchCard: React.FC<MatchCardProps> = ({ match, onUpdate, editMode = false, compact = false }) => {
+export const MatchCard: React.FC<MatchCardProps> = ({ match, onUpdate, editMode = true, compact = false }) => {
   const isCompleted = !!match.winner;
   const winnerId = match.winner?.id;
 
@@ -21,14 +21,14 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, onUpdate, editMode 
   };
 
   const rowClass = (teamId?: string) => {
-    if (!isCompleted || !teamId) return 'text-metallic-700';
-    return teamId === winnerId ? 'text-metallic-900 font-semibold' : 'text-metallic-400 line-through';
+    if (!isCompleted || !teamId) return 'text-secondary';
+    return teamId === winnerId ? 'text-primary font-semibold' : 'text-secondary/50 line-through';
   };
 
   const cardClass = () => {
-    if (isCompleted) return 'border-metallic-200 bg-bg';
-    if (match.team1 && match.team2) return 'border-metallic-300 bg-surface shadow-sm hover:border-metallic-500';
-    return 'border-dashed border-metallic-200 bg-transparent opacity-50';
+    if (isCompleted) return 'border-border bg-bg';
+    if (match.team1 && match.team2) return 'border-border bg-surface shadow-sm hover:border-secondary';
+    return 'border-dashed border-border bg-transparent opacity-50';
   };
 
   const rows = [
@@ -56,20 +56,20 @@ export const MatchCard: React.FC<MatchCardProps> = ({ match, onUpdate, editMode 
           return (
             <div key={num} className="flex items-center justify-between gap-2">
               <div className="flex items-center gap-2 flex-1 min-w-0">
-                <span className={`shrink-0 w-1 h-4 rounded-full ${isWinner ? 'bg-metallic-800' : 'bg-metallic-200'}`} />
+                <span className={`shrink-0 w-1 h-4 rounded-full ${isWinner ? 'bg-accent' : 'bg-border'}`} />
                 <span className={`text-sm truncate ${rowClass(team?.id)}`}>{team?.name || 'TBD'}</span>
-                {isWinner && <Trophy size={11} className="text-metallic-700 shrink-0" />}
+                {isWinner && <Trophy size={11} className="text-accent shrink-0" />}
               </div>
               {editMode ? (
                 <input
                   type="number"
                   value={score ?? ''}
                   onChange={(e) => handleScoreChange(num, e.target.value)}
-                  className="w-11 px-1.5 py-1 bg-surface border border-metallic-300 rounded-lg text-metallic-900 font-bold text-center focus:outline-none focus:border-metallic-700 focus:ring-2 focus:ring-metallic-700/20 transition-all text-sm"
+                  className="w-11 px-1.5 py-1 bg-bg border border-border rounded-lg text-primary font-bold text-center focus:outline-none focus:border-accent focus:ring-2 focus:ring-accent/20 transition-all text-sm"
                   placeholder="0"
                 />
               ) : (
-                <span className={`text-sm font-bold tabular-nums ${isWinner ? 'text-metallic-900' : 'text-metallic-400'}`}>
+                <span className={`text-sm font-bold tabular-nums ${isWinner ? 'text-primary' : 'text-secondary/50'}`}>
                   {score ?? '–'}
                 </span>
               )}

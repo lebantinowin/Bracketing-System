@@ -1,5 +1,6 @@
 import type { Bracket } from '../types';
 import jsPDF from 'jspdf';
+import { toPng } from 'html-to-image';
 
 /**
  * Export bracket to JSON
@@ -139,6 +140,31 @@ export const exportToPDF = (bracket: Bracket, filename: string = 'bracket.pdf') 
   });
 
   pdf.save(filename);
+};
+
+/**
+ * Export bracket to Image (PNG)
+ */
+export const exportToImage = async (elementId: string, filename: string = 'bracket.png') => {
+  const element = document.getElementById(elementId);
+  if (!element) {
+    console.error('Export element not found');
+    return;
+  }
+
+  try {
+    const dataUrl = await toPng(element, {
+      backgroundColor: '#0a0a0c', // Match dark theme bg
+      quality: 0.95,
+      pixelRatio: 2,
+    });
+    const link = document.createElement('a');
+    link.download = filename;
+    link.href = dataUrl;
+    link.click();
+  } catch (err) {
+    console.error('Failed to export image', err);
+  }
 };
 
 /**

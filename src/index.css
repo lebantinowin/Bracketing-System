@@ -151,6 +151,23 @@ input, textarea, button, select {
   color: #ffffff;
 }
 
+.btn-metallic {
+  background: linear-gradient(180deg, #3a3a3c 0%, #2e2e30 100%);
+  border: 1px solid var(--c-border);
+  color: var(--c-primary);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+  transition: all 0.2s ease;
+}
+.btn-metallic:hover {
+  background: linear-gradient(180deg, #48484a 0%, #3a3a3c 100%);
+  border-color: var(--c-secondary);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+}
+.btn-metallic:active {
+  transform: translateY(0);
+}
+
 /* ─────────────────────────────────────────────────────────────
    Shared input baseline
 ───────────────────────────────────────────────────────────── */

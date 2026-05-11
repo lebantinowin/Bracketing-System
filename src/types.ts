@@ -70,6 +70,8 @@ export interface Tournament {
   status: TournamentStatus;
   bracket: Bracket;
   auditLog: AuditAction[];
+  isDeleted?: boolean;
+  deletedAt?: number;
   createdAt: number;
   updatedAt: number;
 }

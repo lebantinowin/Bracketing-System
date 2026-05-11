@@ -7,20 +7,20 @@ import { ExportOptions } from './components/ExportOptions';
 import { MatchListDisplay } from './components/MatchListDisplay';
 import { Login } from './components/Login';
 import { WelcomeDashboard } from './components/WelcomeDashboard';
-import { User as UserIcon, Trophy, LayoutDashboard, Users, GitMerge, Calendar, FileText, Download, ShieldAlert, ChevronLeft, ChevronRight, Activity } from 'lucide-react';
+import { User as UserIcon, Trophy, LayoutDashboard, Users, GitMerge, Calendar, FileText, Download, ShieldAlert, ChevronLeft, ChevronRight, Activity, Trash2 } from 'lucide-react';
 import type { BracketFormat } from './types';
 
 function App() {
-  const [view, setView] = useState<'welcome' | 'overview' | 'teams' | 'bracket' | 'schedule' | 'results' | 'export' | 'audit'>('welcome');
+  const [view, setView] = useState<'welcome' | 'events' | 'overview' | 'teams' | 'bracket' | 'schedule' | 'results' | 'export' | 'audit' | 'recycle'>('welcome');
   const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [editMode] = useState(false);
+  const [editMode] = useState(true);
 
   const {
     tournament, user, logout,
     generateBracket,
     addTeam, addTeams, removeTeam, updateTeam,
     updateMatchResult, resetTournament,
-    fetchTournaments,
+    fetchTournaments, tournaments, restoreTournament, permanentlyDeleteTournament
   } = useTournamentStore();
 
   useEffect(() => {
@@ -53,33 +53,30 @@ function App() {
 
   /* ── Main app shell (Sidebar Layout) ────────────────────── */
   
-  type ViewId = 'welcome' | 'overview' | 'teams' | 'bracket' | 'schedule' | 'results' | 'export' | 'audit';
+  type ViewId = 'welcome' | 'events' | 'overview' | 'teams' | 'bracket' | 'schedule' | 'results' | 'export' | 'audit' | 'recycle';
 
   const menuGroups: { group: string; items: { id: ViewId; icon: React.ElementType; label: string; count?: number }[] }[] = [
     {
       group: 'General',
       items: [
-        { id: 'welcome', icon: LayoutDashboard, label: 'Dashboard' }
+        { id: 'welcome', icon: LayoutDashboard, label: 'Dashboard' },
+        { id: 'events', icon: Calendar, label: 'Events', count: tournaments.filter(t => !t.isDeleted).length },
+        { id: 'audit', icon: FileText, label: 'Audit Log' },
+        { id: 'recycle', icon: Trash2, label: 'Recycle Bin', count: tournaments.filter(t => t.isDeleted).length }
       ]
     }
   ];
 
   if (tournament) {
-    menuGroups.push({
-      group: 'Events',
+    menuGroups.splice(1, 0, {
+      group: `Active: ${tournament.name}`,
       items: [
-        { id: 'overview', icon: LayoutDashboard, label: 'Overview' },
+        { id: 'overview', icon: Activity, label: 'Overview' },
         { id: 'teams', icon: Users, label: 'Teams', count: tournament.bracket.teams.length },
         { id: 'bracket', icon: GitMerge, label: 'Bracket' },
         { id: 'schedule', icon: Calendar, label: 'Schedule' },
         { id: 'results', icon: Activity, label: 'Results' },
         { id: 'export', icon: Download, label: 'Export' }
-      ]
-    });
-    menuGroups.push({
-      group: 'System',
-      items: [
-        { id: 'audit', icon: FileText, label: 'Audit Log' }
       ]
     });
   }
@@ -94,10 +91,10 @@ function App() {
           {sidebarOpen ? (
             <div className="flex items-center gap-2 overflow-hidden">
               <div className="w-8 h-8 rounded bg-surface border border-border flex items-center justify-center shrink-0">
-                <Trophy size={16} className="text-secondary" />
+                <img src="/main-logo.svg" alt="NL" className="w-5 h-5 object-contain" />
               </div>
               <div className="min-w-0">
-                <p className="text-sm font-bold truncate text-primary leading-tight">{tournament?.name || 'Nexus System'}</p>
+                <p className="text-sm font-bold truncate text-primary leading-tight">NL - BMS</p>
                 <p className="text-[10px] text-secondary font-mono tracking-widest uppercase">Admin</p>
               </div>
             </div>
@@ -121,14 +118,7 @@ function App() {
                   return (
                     <button
                       key={item.id}
-                      onClick={() => {
-                        if (item.id === 'welcome') {
-                          resetTournament();
-                          setView('welcome');
-                        } else {
-                          setView(item.id);
-                        }
-                      }}
+                      onClick={() => setView(item.id)}
                       className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg transition-all ${
                         active ? 'bg-surface border border-border text-primary shadow-sm' : 
                         'text-secondary hover:text-primary hover:bg-surface/50 border border-transparent'
@@ -214,6 +204,82 @@ function App() {
               <WelcomeDashboard onNavigate={(v: 'overview' | 'bracket') => setView(v)} />
             )}
 
+            {view === 'events' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="heading text-2xl">All Events</h2>
+                  <button onClick={() => setView('welcome')} className="btn-metallic px-4 py-2 text-sm flex items-center gap-2">
+                    <Trophy size={16} /> Create New
+                  </button>
+                </div>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                  {tournaments.filter(t => !t.isDeleted).map(t => (
+                    <div key={t.id} onClick={() => { useTournamentStore.getState().loadTournament(t); setView('overview'); }} className="card hover:border-metallic-500 cursor-pointer transition-all group">
+                      <div className="flex justify-between items-start mb-4">
+                        <div>
+                          <h3 className="font-bold text-primary group-hover:text-accent transition-colors">{t.name}</h3>
+                          <p className="text-xs text-secondary">{t.gameType} • {t.eventDate}</p>
+                        </div>
+                        <span className="badge">{t.status}</span>
+                      </div>
+                      <div className="flex items-center gap-4 text-xs text-secondary">
+                        <span>{t.bracket.teams.length} Teams</span>
+                        <span>{t.bracket.format.replace('-', ' ')}</span>
+                      </div>
+                    </div>
+                  ))}
+                  {tournaments.filter(t => !t.isDeleted).length === 0 && (
+                    <div className="col-span-full card p-12 text-center text-secondary border-dashed">
+                      No active events found.
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {view === 'recycle' && (
+              <div className="space-y-6">
+                <h2 className="heading text-2xl flex items-center gap-2">
+                  <Trash2 size={24} className="text-secondary" /> Recycle Bin
+                </h2>
+                <div className="card overflow-hidden p-0">
+                  <table className="w-full text-left text-sm">
+                    <thead className="bg-surface/50 border-b border-border">
+                      <tr>
+                        <th className="px-6 py-3 font-bold text-secondary uppercase tracking-widest text-[10px]">Tournament</th>
+                        <th className="px-6 py-3 font-bold text-secondary uppercase tracking-widest text-[10px]">Deleted Date</th>
+                        <th className="px-6 py-3 font-bold text-secondary uppercase tracking-widest text-[10px] text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-border">
+                      {tournaments.filter(t => t.isDeleted).map(t => (
+                        <tr key={t.id} className="hover:bg-surface/30 transition-colors">
+                          <td className="px-6 py-4">
+                            <p className="font-bold text-primary">{t.name}</p>
+                            <p className="text-xs text-secondary">{t.gameType}</p>
+                          </td>
+                          <td className="px-6 py-4 text-secondary">
+                            {t.deletedAt ? new Date(t.deletedAt).toLocaleString() : 'N/A'}
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-2">
+                            <button onClick={() => restoreTournament(t.id)} className="text-accent hover:underline font-medium">Restore</button>
+                            <button onClick={() => permanentlyDeleteTournament(t.id)} className="text-red-500 hover:underline font-medium">Delete Permanently</button>
+                          </td>
+                        </tr>
+                      ))}
+                      {tournaments.filter(t => t.isDeleted).length === 0 && (
+                        <tr>
+                          <td colSpan={3} className="px-6 py-12 text-center text-secondary italic">
+                            Recycle bin is empty.
+                          </td>
+                        </tr>
+                      )}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
             {view === 'overview' && tournament && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
@@ -268,7 +334,7 @@ function App() {
             )}
 
             {view === 'bracket' && tournament && tournament.bracket.rounds.length > 0 && (
-              <BracketDisplay bracket={tournament.bracket} onMatchUpdate={updateMatchResult} editMode={editMode} />
+              <BracketDisplay bracket={tournament.bracket} onMatchUpdate={updateMatchResult} editMode={editMode} onNavigate={setView} />
             )}
 
             {view === 'export' && tournament && tournament.bracket.rounds.length > 0 && (
@@ -291,34 +357,48 @@ function App() {
               <MatchListDisplay bracket={tournament.bracket} mode="results" />
             )}
 
-            {view === 'audit' && tournament && (
+            {view === 'audit' && (
               <div className="card p-6">
                 <h3 className="heading text-lg mb-6">System Audit Log</h3>
                 <div className="space-y-4">
-                  {tournament.auditLog?.length > 0 ? (
-                    tournament.auditLog.map((log) => (
-                      <div key={log.id} className="flex gap-4 p-4 rounded-xl border border-border bg-base items-start">
+                  {(() => {
+                    const logs = (tournament ? tournament.auditLog : tournaments.flatMap(t => t.auditLog.map(l => ({ ...l, tournamentName: t.name }))))
+                      .sort((a, b) => b.timestamp - a.timestamp);
+                    
+                    if (logs.length === 0) return <p className="text-sm text-secondary text-center py-10">No actions recorded yet.</p>;
+
+                    return logs.map((log: any, idx) => (
+                      <div key={log.id || idx} className="flex gap-4 p-4 rounded-xl border border-border bg-base items-start">
                         <div className="shrink-0 mt-0.5">
                           <FileText size={16} className="text-secondary" />
                         </div>
                         <div className="min-w-0 flex-1">
                           <div className="flex items-center justify-between gap-4 mb-1">
-                            <span className="badge badge-dark text-[10px] py-0">{log.type}</span>
+                            <div className="flex items-center gap-2">
+                              <span className="badge badge-dark text-[10px] py-0">{log.type}</span>
+                              {!tournament && 'tournamentName' in log && (
+                                <span className="text-[10px] font-bold text-accent uppercase tracking-tighter">[{log.tournamentName}]</span>
+                              )}
+                            </div>
                             <span className="text-[11px] font-mono text-secondary">{new Date(log.timestamp).toLocaleString()}</span>
                           </div>
                           <p className="text-sm text-primary">{log.description}</p>
                           {log.matchId && <p className="text-xs font-mono text-secondary mt-2">Match: {log.matchId}</p>}
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <p className="text-sm text-secondary text-center py-10">No actions recorded yet.</p>
-                  )}
+                    ));
+                  })()}
                 </div>
               </div>
             )}
 
           </div>
+
+          <footer className="mt-12 py-6 border-t border-border/30 text-center">
+            <p className="text-[10px] font-mono uppercase tracking-[0.2em] text-secondary/50">
+              Powered By: <a href="https://www.facebook.com/profile.php?id=100086407458832" target="_blank" rel="noopener noreferrer" className="text-accent hover:text-primary transition-colors font-bold">Nexus League</a>
+            </p>
+          </footer>
         </main>
       </div>
     </div>

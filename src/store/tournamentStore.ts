@@ -21,6 +21,8 @@ interface TournamentStore {
   loadTournament: (tournament: Tournament) => void;
   resetTournament: () => void;
   deleteTournament: (tournamentId: string) => Promise<void>;
+  restoreTournament: (tournamentId: string) => Promise<void>;
+  permanentlyDeleteTournament: (tournamentId: string) => Promise<void>;
   fetchTournaments: () => Promise<void>;
 }
 
@@ -303,12 +305,60 @@ export const useTournamentStore = create<TournamentStore>((set, get) => ({
   resetTournament: () => set({ tournament: null }),
 
   deleteTournament: async (tournamentId) => {
+    const { tournaments, tournament, saveTournament } = get();
+    const updatedTournaments = tournaments.map(t => 
+      t.id === tournamentId ? { ...t, isDeleted: true, deletedAt: Date.now() } : t
+    );
+    
+    set({ tournaments: updatedTournaments });
+    
+    // If the currently active tournament is the one being deleted, clear it or update it
+    if (tournament?.id === tournamentId) {
+      set({ tournament: { ...tournament, isDeleted: true, deletedAt: Date.now() } });
+      await saveTournament();
+      set({ tournament: null });
+    } else {
+      const tToUpdate = tournaments.find(t => t.id === tournamentId);
+      if (tToUpdate) {
+        // Temporarily set as active to save via saveTournament logic or just manual fetch
+        // For simplicity, let's just use a manual save logic here or update saveTournament
+        try {
+          await fetch(`${API_URL}/tournaments`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ...tToUpdate, isDeleted: true, deletedAt: Date.now() })
+          });
+        } catch (e) { console.error(e); }
+      }
+    }
+  },
+
+  restoreTournament: async (tournamentId) => {
+    const { tournaments, saveTournament } = get();
+    const tToRestore = tournaments.find(t => t.id === tournamentId);
+    if (!tToRestore) return;
+
+    const restored = { ...tToRestore, isDeleted: false, deletedAt: undefined };
+    const updatedTournaments = tournaments.map(t => t.id === tournamentId ? restored : t);
+    
+    set({ tournaments: updatedTournaments });
+    
+    try {
+      await fetch(`${API_URL}/tournaments`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(restored)
+      });
+    } catch (e) { console.error(e); }
+  },
+
+  permanentlyDeleteTournament: async (tournamentId) => {
     const { tournaments, tournament } = get();
     
     try {
       await fetch(`${API_URL}/tournaments/${tournamentId}`, { method: 'DELETE' });
     } catch (error) {
-      console.error('Backend delete failed, falling back to localStorage', error);
+      console.error('Backend delete failed', error);
     }
     
     const newTournaments = tournaments.filter((t) => t.id !== tournamentId);
