@@ -1,0 +1,32 @@
+$kind: http-request
+name: Save or Update Tournament
+method: POST
+url: '{{baseUrl}}/api/tournaments'
+order: 2000
+headers:
+  - key: Content-Type
+    value: application/json
+body:
+  type: json
+  content: |-
+    {
+      "id": "tournament-{{$timestamp}}",
+      "code": "TRN-001",
+      "name": "Sample Tournament",
+      "gameType": "single-elimination",
+      "status": "planning",
+      "organizer": "John Doe",
+      "description": "A sample tournament",
+      "bracket": {
+        "id": "bracket-{{$timestamp}}",
+        "name": "Bracket 1",
+        "format": "single-elimination",
+        "teams": [],
+        "rounds": [],
+        "status": "planning",
+        "createdAt": 1700000000000,
+        "updatedAt": 1700000000000
+      },
+      "createdAt": 1700000000000,
+      "updatedAt": 1700000000000
+    }

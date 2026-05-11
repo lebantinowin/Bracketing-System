@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import type { BracketFormat, Team } from '../types';
 import { generateSingleElimination, generateDoubleElimination, generateRoundRobin } from '../utils/bracketGenerator';
-import { ChevronRight, Target, RefreshCw, Repeat } from 'lucide-react';
+import { ChevronRight } from 'lucide-react';
 
 interface FormatSelectionProps {
   teams: Team[];
@@ -17,104 +17,112 @@ export const FormatSelection: React.FC<FormatSelectionProps> = ({
   const [selectedFormat, setSelectedFormat] = useState<BracketFormat>('single-elimination');
   const [bracketName, setBracketName] = useState('Tournament 1');
 
-  const formats: Array<{ id: BracketFormat; name: string; description: string; icon: React.ReactNode }> = [
+  const formats: Array<{ id: BracketFormat; name: string; description: string; icon: string }> = [
     {
       id: 'single-elimination',
       name: 'Single Elimination',
-      description: "One loss and you're eliminated.",
-      icon: <Target size={22} />,
+      description: 'Lose once and you\'re out. Fast-paced, one champion.',
+      icon: '🎯',
     },
     {
       id: 'double-elimination',
       name: 'Double Elimination',
-      description: 'Two losses required for elimination.',
-      icon: <RefreshCw size={22} />,
+      description: 'Losers bracket. Second chance for teams.',
+      icon: '🔄',
     },
     {
       id: 'round-robin',
       name: 'Round Robin',
-      description: 'Every team plays every other team.',
-      icon: <Repeat size={22} />,
+      description: 'Every team plays every other team. Comprehensive.',
+      icon: '🔁',
     },
   ];
 
   const getPreview = () => {
-    if (teams.length === 0) return 'Add teams to calculate';
-    let rounds: { matches: unknown[] }[] = [];
+    if (teams.length === 0) return 'Add teams to see bracket preview';
+
+    let rounds = [];
     switch (selectedFormat) {
-      case 'single-elimination': rounds = generateSingleElimination(teams); break;
-      case 'double-elimination': rounds = generateDoubleElimination(teams); break;
-      case 'round-robin':        rounds = generateRoundRobin(teams); break;
+      case 'single-elimination':
+        rounds = generateSingleElimination(teams);
+        break;
+      case 'double-elimination':
+        rounds = generateDoubleElimination(teams);
+        break;
+      case 'round-robin':
+        rounds = generateRoundRobin(teams);
+        break;
     }
-    const totalMatches = rounds.reduce((s, r) => s + r.matches.length, 0);
-    return `${rounds.length} rounds · ${totalMatches} matches`;
+
+    const totalMatches = rounds.reduce((sum, round) => sum + round.matches.length, 0);
+    const totalRounds = rounds.length;
+
+    return `${totalRounds} rounds, ${totalMatches} matches`;
   };
 
   const handleGenerate = () => {
-    if (teams.length < 2) { alert('Minimum 2 teams required'); return; }
+    if (teams.length < 2) {
+      alert('Add at least 2 teams to generate a bracket');
+      return;
+    }
+
     onFormatSelected(selectedFormat, bracketName);
   };
 
   return (
-    <div className="card">
+    <div className="bg-white rounded-lg shadow-md p-6">
+      <h2 className="text-2xl font-bold text-gray-800 mb-2">Tournament Format</h2>
+      <p className="text-gray-600 mb-6">Choose a bracket format for your tournament</p>
 
-      {/* Header */}
-      <div className="mb-6">
-        <h2 className="heading text-xl">Tournament Format</h2>
-        <p className="text-sm text-metallic-500 mt-1">Select the bracket structure</p>
-      </div>
-
-      {/* Bracket name */}
-      <div className="mb-6">
-        <label className="label-xs mb-1.5 block">Bracket Name</label>
+      <div className="mb-8">
+        <label className="block text-sm font-medium text-gray-700 mb-2">Bracket Name</label>
         <input
           type="text"
           value={bracketName}
           onChange={(e) => setBracketName(e.target.value)}
-          placeholder="e.g., Main Event"
+          placeholder="Name your tournament"
           disabled={disabled}
-          className="input-base disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 disabled:bg-gray-100"
         />
       </div>
 
-      {/* Format cards */}
-      <div className="flex flex-col gap-3 mb-6">
-        {formats.map((f) => {
-          const active = selectedFormat === f.id;
-          return (
-            <button
-              key={f.id}
-              onClick={() => setSelectedFormat(f.id)}
-              disabled={disabled}
-              className={`p-5 rounded-xl border-2 text-left flex flex-col gap-3 transition-all disabled:opacity-50 disabled:cursor-not-allowed ${
-                active
-                  ? 'border-metallic-900 bg-metallic-200'
-                  : 'border-metallic-300 bg-surface hover:border-metallic-500 hover:bg-bg'
-              }`}
-            >
-              <span className={active ? 'text-metallic-900' : 'text-metallic-500'}>{f.icon}</span>
-              <div>
-                <p className={`font-semibold text-sm ${active ? 'text-metallic-900' : 'text-metallic-800'}`}>{f.name}</p>
-                <p className="text-xs text-metallic-500 mt-0.5 leading-snug">{f.description}</p>
-              </div>
-            </button>
-          );
-        })}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        {formats.map((format) => (
+          <button
+            key={format.id}
+            onClick={() => setSelectedFormat(format.id)}
+            disabled={disabled}
+            className={`p-4 rounded-lg border-2 transition-all ${
+              selectedFormat === format.id
+                ? 'border-blue-600 bg-blue-50'
+                : 'border-gray-200 bg-white hover:border-gray-300'
+            } disabled:opacity-50 disabled:cursor-not-allowed text-left`}
+          >
+            <div className="text-3xl mb-2">{format.icon}</div>
+            <h3 className="font-bold text-gray-800">{format.name}</h3>
+            <p className="text-sm text-gray-600 mt-1">{format.description}</p>
+          </button>
+        ))}
       </div>
 
-      {/* Preview row */}
-      <div className="flex items-center justify-between px-4 py-3 bg-bg rounded-xl border border-metallic-300 mb-6">
-        <span className="label-xs">Preview</span>
-        <span className="text-sm font-semibold text-metallic-900">{getPreview()}</span>
+      <div className="bg-gray-50 rounded-lg p-4 mb-6 border border-gray-200">
+        <p className="text-sm text-gray-700">
+          <strong>Bracket Preview:</strong> {getPreview()}
+        </p>
       </div>
 
-      {/* Generate */}
+      {teams.length < 2 && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-4 text-yellow-800">
+          <p className="text-sm">⚠️ Add at least 2 teams before generating a bracket</p>
+        </div>
+      )}
+
       <button
         onClick={handleGenerate}
         disabled={disabled || teams.length < 2}
-        className="w-full metallic-accent text-white px-6 py-2.5 rounded-xl font-semibold text-sm hover:opacity-90 active:scale-[.99] disabled:opacity-50 disabled:cursor-not-allowed transition-all flex items-center justify-center gap-2"
+        className="w-full bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed font-semibold flex items-center justify-center gap-2"
       >
-        Generate Bracket <ChevronRight size={16} />
+        Generate Bracket <ChevronRight size={20} />
       </button>
     </div>
   );

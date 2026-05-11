@@ -1,0 +1,5 @@
+$kind: http-request
+name: Delete Tournament
+method: DELETE
+url: '{{baseUrl}}/api/tournaments/{{tournamentId}}'
+order: 3000

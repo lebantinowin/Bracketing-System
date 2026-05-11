@@ -1,89 +1,87 @@
 import React from 'react';
 import type { Bracket } from '../types';
 import { exportToJSON, exportToCSV, exportToPDF, exportToHTML } from '../utils/exportUtils';
-import { Download, FileJson, FileText, FileSpreadsheet, File, ChevronRight, Info } from 'lucide-react';
+import { Download, FileJson, FileText, FileSpreadsheet, File, ShieldCheck } from 'lucide-react';
 
 interface ExportOptionsProps {
   bracket: Bracket;
 }
 
 export const ExportOptions: React.FC<ExportOptionsProps> = ({ bracket }) => {
-  const slug = bracket.name.replace(/\s+/g, '_');
-
   const exportOptions = [
     {
       id: 'json',
-      name: 'JSON',
-      description: 'Raw data for external processing.',
+      name: 'Data (JSON)',
+      description: 'Machine-readable format for raw data transfer',
       icon: FileJson,
-      action: () => exportToJSON(bracket, `${slug}.json`),
+      action: () => exportToJSON(bracket, `${bracket.name.replace(/\s+/g, '_')}.json`),
     },
     {
       id: 'csv',
-      name: 'CSV Spreadsheet',
-      description: 'Tabular format for spreadsheet apps.',
+      name: 'Sheet (CSV)',
+      description: 'Spreadsheet compatible tabular format',
       icon: FileSpreadsheet,
-      action: () => exportToCSV(bracket, `${slug}.csv`),
+      action: () => exportToCSV(bracket, `${bracket.name.replace(/\s+/g, '_')}.csv`),
     },
     {
       id: 'pdf',
-      name: 'PDF Document',
-      description: 'Print-ready professional document.',
+      name: 'Report (PDF)',
+      description: 'Professional document for printing & sharing',
       icon: FileText,
-      action: () => exportToPDF(bracket, `${slug}.pdf`),
+      action: () => exportToPDF(bracket, `${bracket.name.replace(/\s+/g, '_')}.pdf`),
     },
     {
       id: 'html',
-      name: 'HTML Page',
-      description: 'Interactive browser-ready format.',
+      name: 'Web (HTML)',
+      description: 'Static web-ready format with styles',
       icon: File,
-      action: () => exportToHTML(bracket, `${slug}.html`),
+      action: () => exportToHTML(bracket, `${bracket.name.replace(/\s+/g, '_')}.html`),
     },
   ];
 
   return (
-    <div className="card">
-
-      {/* Header */}
-      <div className="flex items-center gap-3 mb-6 pb-6 border-b border-metallic-300">
-        <div className="w-9 h-9 bg-bg border border-metallic-300 rounded-xl flex items-center justify-center text-metallic-700">
-          <Download size={18} />
-        </div>
-        <div>
-          <h2 className="heading text-xl">Export Options</h2>
-          <p className="text-sm text-metallic-500 mt-0.5">Download bracket data and reports</p>
+    <div className="card !p-0 overflow-hidden">
+      <div className="px-6 py-5 border-b border-metallic-200 bg-metallic-50/50 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div className="w-10 h-10 bg-metallic-950 rounded-xl flex items-center justify-center text-white shadow-lg">
+            <Download size={20} />
+          </div>
+          <div>
+            <h2 className="heading text-xl leading-tight">Export Engine</h2>
+            <p className="text-[10px] text-metallic-500 font-mono tracking-widest uppercase mt-0.5">Generate Tournament Documents</p>
+          </div>
         </div>
       </div>
 
-      {/* Export cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3">
-        {exportOptions.map(({ id, name, description, icon: Icon, action }) => (
-          <button
-            key={id}
-            onClick={action}
-            className="group p-5 rounded-xl border border-metallic-300 bg-surface hover:border-metallic-600 hover:shadow-sm transition-all text-left flex flex-col gap-3 active:scale-[.98]"
-          >
-            <span className="text-metallic-500 group-hover:text-metallic-900 transition-colors">
-              <Icon size={22} />
-            </span>
-            <div className="flex-1">
-              <p className="font-semibold text-sm text-metallic-900">{name}</p>
-              <p className="text-xs text-metallic-500 mt-0.5 leading-snug">{description}</p>
-            </div>
-            <div className="flex items-center gap-1 label-xs text-metallic-500 group-hover:text-metallic-900 transition-colors">
-              Export <ChevronRight size={11} className="group-hover:translate-x-0.5 transition-transform" />
-            </div>
-          </button>
-        ))}
-      </div>
+      <div className="p-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          {exportOptions.map((option) => {
+            const Icon = option.icon;
+            return (
+              <button
+                key={option.id}
+                onClick={option.action}
+                className="group relative flex flex-col p-6 bg-white border border-metallic-200 rounded-2xl text-left hover:border-metallic-950 hover:shadow-xl hover:shadow-metallic-950/5 transition-all active:scale-[0.98]"
+              >
+                <div className="w-12 h-12 mb-4 rounded-xl bg-metallic-50 border border-metallic-100 flex items-center justify-center text-metallic-400 group-hover:bg-metallic-950 group-hover:text-white transition-all">
+                  <Icon size={24} />
+                </div>
+                <h3 className="font-black text-metallic-900 group-hover:text-metallic-950 transition-colors uppercase tracking-tight italic">{option.name}</h3>
+                <p className="text-xs text-metallic-500 mt-2 font-medium leading-relaxed">{option.description}</p>
+                <div className="mt-6 flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-metallic-400 group-hover:text-metallic-950 transition-colors">
+                  Generate <span className="text-[14px]">→</span>
+                </div>
+              </button>
+            );
+          })}
+        </div>
 
-      {/* Info note */}
-      <div className="mt-6 flex items-start gap-3 px-4 py-3.5 bg-bg rounded-xl border border-metallic-300">
-        <Info size={15} className="text-metallic-500 mt-0.5 shrink-0" />
-        <div>
-          <p className="text-sm font-semibold text-metallic-800">Best Practice</p>
-          <p className="text-xs text-metallic-500 mt-1 leading-relaxed">
-            Export your bracket periodically. Use JSON for data backups and PDF for sharing with participants.
+        <div className="mt-8 p-4 bg-metallic-50 rounded-2xl border border-metallic-200 flex items-center gap-3">
+          <div className="w-8 h-8 rounded-lg bg-white border border-metallic-200 flex items-center justify-center shrink-0">
+            <ShieldCheck size={16} className="text-metallic-400" />
+          </div>
+          <p className="text-xs font-medium text-metallic-600 italic">
+            Exports include all match results, team metadata, and generated bracket hierarchical structures.
           </p>
         </div>
       </div>

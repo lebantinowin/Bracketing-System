@@ -1,0 +1,50 @@
+{
+  "info": {
+    "name": "Nexus League API",
+    "description": "REST API collection for the Nexus League Tournament Management System",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "item": [
+    {
+      "name": "Tournaments",
+      "item": [
+        {
+          "name": "Get All Tournaments",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/api/tournaments",
+            "description": "Returns all tournaments sorted by creation date descending."
+          }
+        },
+        {
+          "name": "Save / Upsert Tournament",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/api/tournaments",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"tournament-1234567890\",\n  \"code\": \"1234567890\".slice(-8),\n  \"name\": \"Summer Cup 2026\",\n  \"gameType\": \"single-elimination\",\n  \"status\": \"planning\",\n  \"organizer\": \"Admin\",\n  \"description\": \"Annual summer championship\",\n  \"bracket\": {\n    \"id\": \"bracket-1234567890\",\n    \"name\": \"Bracket 1\",\n    \"format\": \"single-elimination\",\n    \"teams\": [],\n    \"rounds\": [],\n    \"status\": \"planning\",\n    \"createdAt\": 1234567890,\n    \"updatedAt\": 1234567890\n  },\n  \"createdAt\": 1234567890,\n  \"updatedAt\": 1234567890\n}"
+            },
+            "description": "Creates or updates a tournament using INSERT ... ON DUPLICATE KEY UPDATE."
+          }
+        },
+        {
+          "name": "Delete Tournament",
+          "request": {
+            "method": "DELETE",
+            "url": "{{base_url}}/api/tournaments/:id",
+            "description": "Permanently deletes a tournament by ID."
+          }
+        }
+      ]
+    }
+  ],
+  "variable": [
+    {
+      "key": "base_url",
+      "value": "http://localhost:3001",
+      "description": "Local development server"
+    }
+  ]
+}

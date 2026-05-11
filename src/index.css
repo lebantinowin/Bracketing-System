@@ -1,245 +1,63 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Outfit:wght@400;500;600;700;800;900&family=DM+Mono:wght@400;500&display=swap");
 @import "tailwindcss";
 
-/* ─────────────────────────────────────────────────────────────
-   Tailwind v4 theme
-───────────────────────────────────────────────────────────── */
 @theme {
-  --font-sans:    "Inter",  system-ui, -apple-system, sans-serif;
-  --font-heading: "Outfit", system-ui, -apple-system, sans-serif;
-  --font-mono:    "DM Mono", ui-monospace, SFMono-Regular, monospace;
+  --color-bg: #f8f9fa;
+  --color-metallic-50: #fafafa;
+  --color-metallic-100: #f5f5f5;
+  --color-metallic-200: #e5e5e5;
+  --color-metallic-300: #d4d4d4;
+  --color-metallic-400: #a3a3a3;
+  --color-metallic-500: #737373;
+  --color-metallic-600: #525252;
+  --color-metallic-700: #404040;
+  --color-metallic-800: #262626;
+  --color-metallic-900: #171717;
+  --color-metallic-950: #0a0a0a;
 
-  --color-base:         #111113;
-  --color-sidebar:      #1a1a1c;
-  --color-surface:      #2e2e30;
-  --color-primary:      #f0f0f2;
-  --color-secondary:    #a0a0a8;
-  --color-border:       #3a3a3c;
-  --color-accent:       #48484a;
-  
-  --color-metallic-950: #0f172a;
-  --color-metallic-900: #1e293b;
-  --color-metallic-800: #334155;
-  --color-metallic-300: #e2e8f0;
+  --font-sans: 'Outfit', system-ui, -apple-system, sans-serif;
 }
 
-/* ─────────────────────────────────────────────────────────────
-   CSS custom properties
-───────────────────────────────────────────────────────────── */
-:root {
-  /* Typography */
-  --ff-sans:    "Inter",  system-ui, -apple-system, sans-serif;
-  --ff-heading: "Outfit", system-ui, -apple-system, sans-serif;
-  --ff-mono:    "DM Mono", ui-monospace, monospace;
-
-  /* Surfaces & Colors */
-  --c-base:      #111113;
-  --c-sidebar:   #1a1a1c;
-  --c-surface:   #2e2e30;
-  --c-primary:   #f0f0f2;
-  --c-secondary: #a0a0a8;
-  --c-border:    #3a3a3c;
-  --c-accent:    #48484a;
-
-  /* Legacy aliases to prevent sudden breakage */
-  --c-bg:        var(--c-base);
-  --c-300:       var(--c-border);
-  --c-400:       var(--c-secondary);
-  --c-500:       var(--c-secondary);
-  --c-600:       var(--c-secondary);
-  --c-700:       var(--c-primary);
-  --c-800:       var(--c-primary);
-  --c-900:       #ffffff;
-  --c-950:       #ffffff;
-
-  /* Consistent spacing tokens */
-  --sp-1:  0.25rem;   /* 4px  */
-  --sp-2:  0.5rem;    /* 8px  */
-  --sp-3:  0.75rem;   /* 12px */
-  --sp-4:  1rem;      /* 16px */
-  --sp-5:  1.25rem;   /* 20px */
-  --sp-6:  1.5rem;    /* 24px */
-  --sp-7:  1.75rem;   /* 28px */
-  --sp-8:  2rem;      /* 32px */
-  --sp-10: 2.5rem;    /* 40px */
-  --sp-12: 3rem;      /* 48px */
+@layer base {
+  body {
+    @apply bg-bg text-metallic-900 font-sans;
+  }
 }
 
-/* ─────────────────────────────────────────────────────────────
-   Base overrides
-───────────────────────────────────────────────────────────── */
+@layer components {
+  .card {
+    @apply bg-white border border-metallic-200 rounded-2xl p-6 shadow-[0_4px_20px_rgba(0,0,0,0.03)] transition-all;
+  }
 
-html {
-  scroll-behavior: smooth;
-  background-color: var(--c-bg);
-  -webkit-text-size-adjust: 100%;
-}
+  .input-base {
+    @apply w-full px-4 py-2.5 bg-metallic-50 border border-metallic-200 rounded-xl text-sm transition-all focus:outline-none focus:ring-2 focus:ring-metallic-900/5 focus:border-metallic-400 placeholder:text-metallic-400;
+  }
 
-body {
-  font-family: var(--ff-sans);
-  font-size: 0.9375rem;
-  line-height: 1.6;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  color: var(--c-primary);
-  background-color: var(--c-base);
-  min-height: 100vh;
-  overflow-x: hidden;
-}
+  .label-xs {
+    @apply text-[10px] font-black uppercase tracking-widest text-metallic-400 block mb-1;
+  }
 
-input, textarea, button, select {
-  font-family: inherit;
-}
+  .heading {
+    @apply font-black tracking-tight uppercase italic text-metallic-950;
+  }
 
-#root {
-  width: 100%;
-  min-height: 100svh;
-}
+  .metallic-accent {
+    @apply bg-metallic-950 text-white hover:bg-metallic-800 transition-colors shadow-lg shadow-metallic-900/10;
+  }
 
-/* ─────────────────────────────────────────────────────────────
-   Typography utilities
-───────────────────────────────────────────────────────────── */
-.heading {
-  font-family: var(--ff-heading);
-  font-weight: 700;
-  letter-spacing: -0.02em;
-  color: var(--c-primary);
-  line-height: 1.25;
+  .badge {
+    @apply px-2 py-0.5 bg-metallic-100 text-metallic-600 text-[10px] font-bold rounded uppercase tracking-wider border border-metallic-200;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-metallic-200 rounded-full hover:bg-metallic-300;
+  }
 }
 
-.label-xs {
-  display: block;
-  font-size: 0.6875rem;      /* 11px */
-  font-weight: 700;
-  letter-spacing: 0.07em;
-  text-transform: uppercase;
-  color: var(--c-secondary);
-}
-
-.mono-id {
-  font-family: var(--ff-mono);
-  font-size: 0.8125rem;
-  letter-spacing: 0.05em;
-  color: var(--c-secondary);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Card / surface
-   Padding is defined here — do NOT add p-* Tailwind classes
-   on elements that use .card or .clean-card.
-───────────────────────────────────────────────────────────── */
-.card,
-.clean-card {
-  background-color: var(--c-surface);
-  border: 1px solid var(--c-border);
-  border-radius: 1rem;
-  padding: 1.75rem 2rem;          /* 28px 32px */
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-}
-
-/* Larger padding variant — use class="card card-lg" */
-.card-lg {
-  padding: 2.5rem 2.25rem;        /* 40px 36px */
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Accent (dark gradient fill for buttons / icons)
-───────────────────────────────────────────────────────────── */
-.metallic-accent {
-  background: linear-gradient(135deg, var(--c-accent) 0%, #5c5c5e 100%);
-  border: 1px solid #636366;
-  color: #ffffff;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Shared input baseline
-───────────────────────────────────────────────────────────── */
-.input-base {
-  width: 100%;
-  padding: 0.625rem 0.875rem;        /* 10px 14px */
-  background-color: var(--c-base);
-  border: 1px solid var(--c-border);
-  border-radius: 0.625rem;
-  color: var(--c-primary);
-  font-size: 0.9375rem;
-  font-weight: 500;
-  transition: border-color 150ms ease, box-shadow 150ms ease;
-  outline: none;
-}
-.input-base::placeholder {
-  color: var(--c-secondary);
-  font-weight: 400;
-}
-.input-base:focus {
-  border-color: var(--c-primary);
-  box-shadow: 0 0 0 2px rgba(240, 240, 242, 0.1);
-}
-.input-base:disabled {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Badge / pill
-───────────────────────────────────────────────────────────── */
-.badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.25rem;
-  font-size: 0.6875rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  padding: 0.2rem 0.55rem;
-  border-radius: 0.375rem;
-  border: 1px solid var(--c-border);
-  background-color: var(--c-base);
-  color: var(--c-secondary);
-  white-space: nowrap;
-}
-.badge-dark {
-  background-color: var(--c-primary);
-  border-color: var(--c-primary);
-  color: var(--c-base);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Divider — flex child that fills remaining row space
-───────────────────────────────────────────────────────────── */
-.divider {
-  flex: 1;
-  height: 1px;
-  background-color: var(--c-border);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Custom scrollbar
-───────────────────────────────────────────────────────────── */
-.custom-scrollbar::-webkit-scrollbar        { width: 5px; height: 5px; }
-.custom-scrollbar::-webkit-scrollbar-track  { background: transparent; }
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background: var(--c-300);
-  border-radius: 10px;
-}
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: var(--c-400);
-}
-
-/* ─────────────────────────────────────────────────────────────
-   Animations
-───────────────────────────────────────────────────────────── */
-@keyframes fadeUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);   }
-}
-.fade-up {
-  animation: fadeUp 220ms ease-out both;
-}
-
-@keyframes pulseDot {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: 0.3; }
-}
-.pulse-dot {
-  animation: pulseDot 1.6s ease-in-out infinite;
-}

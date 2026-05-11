@@ -1,0 +1,7 @@
+name: My Environment
+values:
+  - key: base_url
+    value: postman-echo.com
+  - key: name
+    value: Aldwin
+color: null
